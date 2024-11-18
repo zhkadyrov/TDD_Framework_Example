@@ -9,10 +9,9 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.Map;
 
-public class TestUtils {
-    public static final long WAIT = 10;
-
+public class parseXML {
     public HashMap<String, String> parseStringXML (InputStream file) throws Exception {
         HashMap<String, String> stringMap = new HashMap<>();
 
@@ -46,5 +45,3 @@ public class TestUtils {
         return stringMap;
     }
 }
-
-

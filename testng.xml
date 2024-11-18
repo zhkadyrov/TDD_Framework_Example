@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
 <suite name="All Test Suite" parallel="none"> <!-- если будут запускаться несколько устройств parallel должен быть true -->
+    <listeners>
+        <listener class-name="com.qa.listeners.TestListener"/>
+    </listeners>
     <test name="/Users/janbolot/QA/Ideaprojects/mobileQA/TDD_Framework_Example">
         <parameter name="platformName" value="Android"/>
         <parameter name="platformVersion" value="14"/>

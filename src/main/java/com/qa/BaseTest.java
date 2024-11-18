@@ -4,10 +4,8 @@ import com.qa.utils.TestUtils;
 import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.android.options.UiAutomator2Options;
-import io.appium.java_client.pagefactory.AppiumFieldDecorator;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.annotations.AfterTest;
@@ -17,24 +15,32 @@ import org.testng.annotations.Parameters;
 import java.io.InputStream;
 import java.net.URL;
 import java.time.Duration;
+import java.util.HashMap;
 import java.util.Properties;
-
-import static java.io.File.separator;
 
 public class BaseTest {
     protected static AppiumDriver driver;
     protected static WebDriverWait wait;
     protected static Properties properties;
     protected InputStream inputStream;
+    protected static HashMap<String, String> strings = new HashMap<>();
+    protected InputStream stringsInputStream;
+    protected TestUtils testUtils;
 
     @BeforeTest
     @Parameters({"platformName", "platformVersion", "deviceName"})
-    public void beforeTest(String platformName, String platformVersion, String deviceName) {
+    public void beforeTest(String platformName, String platformVersion, String deviceName) throws Exception {
         try {
             properties = new Properties();
             String propertiesFileName = "config.properties";
             inputStream = getClass().getClassLoader().getResourceAsStream(propertiesFileName);
+
             properties.load(inputStream);
+
+            String xmlFileName = "strings/strings.xml";
+            stringsInputStream = getClass().getClassLoader().getResourceAsStream(xmlFileName);
+            testUtils = new TestUtils();
+            strings = testUtils.parseStringXML(stringsInputStream);
 
             URL url = new URL(properties.getProperty("appiumURL"));
             URL appPath = getClass().getClassLoader().getResource(properties.getProperty("androidAppLocation"));
@@ -54,6 +60,13 @@ public class BaseTest {
             wait = new WebDriverWait(driver, Duration.ofSeconds(TestUtils.WAIT));
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            if (inputStream != null) {
+                inputStream.close();
+            }
+            if (stringsInputStream != null) {
+                stringsInputStream.close();
+            }
         }
     }
 
