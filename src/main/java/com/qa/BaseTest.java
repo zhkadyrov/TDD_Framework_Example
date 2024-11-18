@@ -4,7 +4,10 @@ import com.qa.utils.TestUtils;
 import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.android.options.UiAutomator2Options;
+import io.appium.java_client.ios.IOSDriver;
+import io.appium.java_client.ios.options.XCUITestOptions;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.MutableCapabilities;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -18,87 +21,259 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.Properties;
 
+/**
+ * BaseTest is the foundational class for all test classes.
+ * It provides common setup, teardown, and utility methods for interacting with the AppiumDriver.
+ */
 public class BaseTest {
+
+    // Common resources shared across tests
     protected static AppiumDriver driver;
     protected static WebDriverWait wait;
     protected static Properties properties;
-    protected InputStream inputStream;
     protected static HashMap<String, String> strings = new HashMap<>();
-    protected InputStream stringsInputStream;
+    protected static String platform;
     protected TestUtils testUtils;
 
+    // InputStreams for loading configuration files
+    private InputStream inputStream;
+    private InputStream stringsInputStream;
+
+    /**
+     * BeforeTest sets up the AppiumDriver and loads configuration and string resources.
+     *
+     * @param platformName    The name of the mobile platform (e.g., Android).
+     * @param platformVersion The version of the platform.
+     * @param deviceName      The name of the device.
+     * @throws Exception If any error occurs during setup.
+     */
     @BeforeTest
-    @Parameters({"platformName", "platformVersion", "deviceName"})
-    public void beforeTest(String platformName, String platformVersion, String deviceName) throws Exception {
+    @Parameters({"emulator", "platformName", "platformVersion", "deviceName"})
+    public void beforeTest(String emulator, String platformName, String platformVersion, String deviceName) throws Exception {
         try {
-            properties = new Properties();
-            String propertiesFileName = "config.properties";
-            inputStream = getClass().getClassLoader().getResourceAsStream(propertiesFileName);
+            // Load properties file
+            properties = loadProperties("config.properties");
 
-            properties.load(inputStream);
+            // Load string resources
+            strings = loadStringResources("strings/strings.xml");
 
-            String xmlFileName = "strings/strings.xml";
-            stringsInputStream = getClass().getClassLoader().getResourceAsStream(xmlFileName);
-            testUtils = new TestUtils();
-            strings = testUtils.parseStringXML(stringsInputStream);
+            // Initialize AppiumDriver with desired capabilities
+            driver = initializeDriver(emulator, platformName, platformVersion, deviceName);
 
-            URL url = new URL(properties.getProperty("appiumURL"));
-            URL appPath = getClass().getClassLoader().getResource(properties.getProperty("androidAppLocation"));
-
-            UiAutomator2Options androidOptions = new UiAutomator2Options();
-            androidOptions.setCapability("appium:automationName", properties.getProperty("androidAutomationName"));
-            androidOptions.setCapability("appium:platformName", platformName);
-            androidOptions.setCapability("appium:platformVersion", platformVersion);
-            androidOptions.setCapability("appium:deviceName", deviceName);
-            androidOptions.setCapability("appium:app", appPath);
-            androidOptions.setCapability("appium:appPackage", properties.getProperty("androidAppPackage"));
-            androidOptions.setCapability("appium:appActivity", properties.getProperty("androidAppActivity"));
-
-            driver = new AndroidDriver(url,androidOptions);
-            String sessionId = driver.getSessionId().toString();
+            // Configure implicit and explicit waits
             driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
             wait = new WebDriverWait(driver, Duration.ofSeconds(TestUtils.WAIT));
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            if (inputStream != null) {
-                inputStream.close();
-            }
-            if (stringsInputStream != null) {
-                stringsInputStream.close();
-            }
+            throw e; // Re-throw the exception to fail the test setup
         }
     }
 
+    /**
+     * AfterTest closes the AppiumDriver.
+     */
     @AfterTest
     public void afterTest() {
-        driver.quit();
+        if (driver != null) {
+            driver.quit();
+        }
     }
 
+    // Private Helper Methods
+
+    /**
+     * Loads properties from the specified file.
+     *
+     * @param fileName The name of the properties file.
+     * @return The loaded Properties object.
+     * @throws Exception If the file cannot be loaded.
+     */
+    private Properties loadProperties(String fileName) throws Exception {
+        Properties props = new Properties();
+        inputStream = getClass().getClassLoader().getResourceAsStream(fileName);
+        if (inputStream == null) {
+            throw new Exception("Properties file not found: " + fileName);
+        }
+        props.load(inputStream);
+        inputStream.close();
+        return props;
+    }
+
+    /**
+     * Loads string resources from the specified XML file.
+     *
+     * @param fileName The name of the XML file.
+     * @return A HashMap containing the parsed strings.
+     * @throws Exception If the file cannot be loaded or parsed.
+     */
+    private HashMap<String, String> loadStringResources(String fileName) throws Exception {
+        stringsInputStream = getClass().getClassLoader().getResourceAsStream(fileName);
+        if (stringsInputStream == null) {
+            throw new Exception("Strings file not found: " + fileName);
+        }
+        HashMap<String, String> parsedStrings = new TestUtils().parseStringXML(stringsInputStream);
+        stringsInputStream.close();
+        return parsedStrings;
+    }
+
+    /**
+     * Initializes the AppiumDriver with the specified parameters.
+     *
+     * @param platformName    The name of the mobile platform.
+     * @param platformVersion The version of the platform.
+     * @param deviceName      The name of the device.
+     * @return The initialized AppiumDriver.
+     * @throws Exception If an error occurs during driver initialization.
+     */
+    private AppiumDriver initializeDriver(String emulator, String platformName, String platformVersion, String deviceName) throws Exception {
+        URL appiumServerUrl = new URL(properties.getProperty("appiumURL"));
+        URL appLocationPath = getClass().getClassLoader().getResource(
+                platformName.equalsIgnoreCase("android")
+                        ? properties.getProperty("androidAppLocation")
+                        : properties.getProperty("iosAppLocation")
+        );
+        platform = platformName;
+
+        switch (platformName.toLowerCase()) {
+            case "android":
+                UiAutomator2Options androidOptions = new UiAutomator2Options();
+                setCommonCapabilities(androidOptions, platformName, platformVersion, deviceName);
+                if (emulator.equals("true")) {
+                    androidOptions.setCapability("appium:avd", deviceName); // Pixel_5_API_34
+                    androidOptions.setCapability("appium:avdLaunchTimeout", 120_000);
+                    androidOptions.setCapability("appium:newCommandTimeout", 120);
+                }
+
+//                androidOptions.setCapability("appium:app", appLocationPath);
+                androidOptions.setCapability("appium:appPackage", properties.getProperty("androidAppPackage"));
+                androidOptions.setCapability("appium:appActivity", properties.getProperty("androidAppActivity"));
+                return new AndroidDriver(appiumServerUrl, androidOptions);
+
+            case "ios":
+                XCUITestOptions iosOptions = new XCUITestOptions();
+                setCommonCapabilities(iosOptions, platformName, platformVersion, deviceName);
+//                iosOptions.setCapability("appium:app", appLocationPath);
+                iosOptions.setCapability("appium:bundleId", properties.getProperty("iosBundleId"));
+
+                if (emulator.equals("true")) {
+                    iosOptions.setCapability("appium:simulatorStartupTimeout", 120_000);
+                    iosOptions.setCapability("appium:newCommandTimeout", 120);
+                }
+
+                return new IOSDriver(appiumServerUrl, iosOptions);
+
+            default:
+                throw new IllegalArgumentException("Unknown platform: " + platformName);
+        }
+    }
+
+    /**
+     * Устанавливает общие капабилити для драйверов.
+     */
+    private void setCommonCapabilities(MutableCapabilities options, String platformName, String platformVersion, String deviceName) {
+        if (platformName.equalsIgnoreCase("android")) {
+            options.setCapability("appium:automationName", properties.getProperty("androidAutomationName"));
+        } else if (platformName.equalsIgnoreCase("ios")) {
+            options.setCapability("appium:automationName", properties.getProperty("iosAutomationName"));
+        }
+
+        options.setCapability("appium:automationName", properties.getProperty(platformName.toLowerCase() + "AutomationName"));
+        options.setCapability("appium:platformName", platformName);
+        options.setCapability("appium:platformVersion", platformVersion);
+        options.setCapability("appium:deviceName", deviceName);
+    }
+
+    // Utility Methods
+
+    /**
+     * Waits for a WebElement to be visible.
+     *
+     * @param element The WebElement to wait for.
+     */
     public void waitForVisibility(WebElement element) {
         wait.until(ExpectedConditions.visibilityOf(element));
     }
 
+    /**
+     * Clicks on a WebElement after ensuring it is clickable.
+     *
+     * @param element The WebElement to click on.
+     */
     public void click(WebElement element) {
         waitForVisibility(element);
         wait.until(ExpectedConditions.elementToBeClickable(element));
         element.click();
     }
 
+    /**
+     * Sends text input to a WebElement.
+     *
+     * @param element The WebElement to send text to.
+     * @param text    The text to input.
+     */
     public void sendKeys(WebElement element, String text) {
         waitForVisibility(element);
         element.sendKeys(text);
+//        for (char c : text.toCharArray()) {
+//            element.sendKeys(String.valueOf(c));
+//            try {
+//                Thread.sleep(1); // Задержка между символами
+//            } catch (Exception e) {}
+//        }
     }
 
+    /**
+     * Retrieves the specified attribute of a WebElement.
+     *
+     * @param element The WebElement to query.
+     * @param key     The attribute name.
+     * @return The attribute value.
+     */
     public String getAttribute(WebElement element, String key) {
         waitForVisibility(element);
         return element.getAttribute(key);
     }
 
+    /**
+     * Scrolls to a WebElement.
+     *
+     * @param element The WebElement to scroll to.
+     */
     public void scrollToElement(WebElement element) {
         ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView;", element);
     }
+
+    public String getText(WebElement element) {
+        return switch (platform.toLowerCase()) {
+            case "android" -> getAttribute(element, "text");
+            case "ios" -> getAttribute(element, "label");
+            default -> null;
+        };
+    }
+
+    public void clearField(WebElement element) {
+        waitForVisibility(element);
+        element.clear();
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

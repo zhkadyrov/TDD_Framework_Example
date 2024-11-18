@@ -1,29 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
-<suite name="All Test Suite" parallel="none"> <!-- если будут запускаться несколько устройств parallel должен быть true -->
+<suite name="All Test Suite" parallel="none"> <!-- Для параллельного запуска тестов -->
     <listeners>
-        <listener class-name="com.qa.listeners.TestListener"/>
+        <listener class-name="com.qa.listeners.TestListener"/> <!-- Ваш слушатель -->
     </listeners>
-    <test name="/Users/janbolot/QA/Ideaprojects/mobileQA/TDD_Framework_Example">
+
+    <!-- Тест для Android -->
+    <test name="Android Tests">
         <parameter name="platformName" value="Android"/>
         <parameter name="platformVersion" value="14"/>
-        <parameter name="deviceName" value="Pixel_5"/>
+        <parameter name="deviceName" value="Pixel_5_API_34"/>
+        <parameter name="emulator" value="true"/>
         <classes>
             <class name="com.qa.tests.LoginTests"/>
         </classes>
     </test>
+
+    <!-- Тест для iOS -->
+    <test name="iOS Tests">
+        <parameter name="platformName" value="iOS"/>
+        <parameter name="platformVersion" value="17.5"/>
+        <parameter name="deviceName" value="iPhone SE (3rd generation)"/>
+        <parameter name="emulator" value="true"/>
+        <classes>
+            <class name="com.qa.tests.LoginTests"/>
+        </classes>
+    </test>
+
 </suite>
 
 
-<!--При надобности можно добавить еще тестовый блок с другим девайсом если необходимо запустить на разных устройствах-->
-<!--<test name="/Users/janbolot/QA/Ideaprojects/mobileQA/TDD_Framework_Example">-->
-<!--<parameter name="platformName" value="Android"/>-->
-<!--<parameter name="platforVersion" value="15"/>-->
-<!--<parameter name="deviceName" value="Samsung_S22"/>-->
-<!--<classes>-->
-<!--    <class name="qa.mobile.TestExample"/>-->
-<!--</classes>-->
-<!--</test>-->
+
+
 
 
 

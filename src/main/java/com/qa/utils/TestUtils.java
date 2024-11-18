@@ -10,41 +10,54 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.InputStream;
 import java.util.HashMap;
 
+/**
+ * Этот класс предназначен для вспомогательных операций, которые могут быть полезны в тестах.
+ * Его основная задача — это парсинг XML-файла и преобразование содержимого в HashMap,
+ * где ключами являются атрибуты name, а значениями — содержимое соответствующих тегов <string>.
+ */
 public class TestUtils {
+    // Константа для ожидания (может использоваться в тестах)
     public static final long WAIT = 10;
 
-    public HashMap<String, String> parseStringXML (InputStream file) throws Exception {
-        HashMap<String, String> stringMap = new HashMap<>();
+    /**
+     * Метод для парсинга XML-файла и преобразования его содержимого в HashMap.
+     * @param file InputStream, содержащий XML-файл.
+     * @return HashMap, где ключ — атрибут name, значение — текст элемента <string>.
+     * @throws Exception В случае ошибок при чтении или обработке XML.
+     */
+    public HashMap<String, String> parseStringXML(InputStream file) throws Exception {
+        HashMap<String, String> stringMap = new HashMap<>(); // Результирующая мапа.
 
-        // Get Document Builder
+        // Создание фабрики и парсера для XML
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();
 
-        // Build Document
+        // Построение DOM-документа из входного файла
         Document document = builder.parse(file);
 
-        // Normalize the XML Structure: It's just too important
+        // Нормализация структуры XML
         document.getDocumentElement().normalize();
 
-        // Here comes the root node
+        // Извлечение корневого элемента (например, <resources>)
         Element root = document.getDocumentElement();
-//        System.out.println(root.getNodeName());
 
-        // Get all elements
+        // Извлечение всех элементов <string>
         NodeList nList = document.getElementsByTagName("string");
-//        System.out.println("===========================================");
 
+        // Обход всех элементов <string>
         for (int temp = 0; temp < nList.getLength(); temp++) {
-            Node node = nList.item(temp);
-//            System.out.println(""); // Just a separator
-            if (node.getNodeType() == Node.ELEMENT_NODE) {
-                Element element = (Element) node;
-                // Store each element key value in map
+            Node node = nList.item(temp); // Получение текущего узла
+            if (node.getNodeType() == Node.ELEMENT_NODE) { // Проверка типа узла
+                Element element = (Element) node; // Преобразование в Element
+                // Сохранение атрибута "name" и текста в мапу
                 stringMap.put(element.getAttribute("name"), element.getTextContent());
             }
         }
-        return stringMap;
+        return stringMap; // Возврат мапы.
     }
 }
+
+
+
 
 
