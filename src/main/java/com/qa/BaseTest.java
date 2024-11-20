@@ -9,6 +9,7 @@ import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.android.options.UiAutomator2Options;
 import io.appium.java_client.ios.IOSDriver;
 import io.appium.java_client.ios.options.XCUITestOptions;
+import io.appium.java_client.screenrecording.CanRecordScreen;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.MutableCapabilities;
 import org.openqa.selenium.WebDriver;
@@ -16,9 +17,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.RemoteWebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import org.testng.annotations.AfterTest;
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.Parameters;
+import org.testng.annotations.*;
 
 import java.io.InputStream;
 import java.net.URL;
@@ -38,6 +37,7 @@ public class BaseTest {
     protected static Properties properties;
     protected static HashMap<String, String> strings = new HashMap<>();
     protected static String platform;
+    protected static String dateTime;
     protected TestUtils testUtils;
 
     // InputStreams for loading configuration files
@@ -65,6 +65,9 @@ public class BaseTest {
             // Initialize AppiumDriver with desired capabilities
             driver = initializeDriver(emulator, platformName, platformVersion, deviceName);
 
+            testUtils = new TestUtils();
+            dateTime = testUtils.getDateTime();
+
             // Configure implicit and explicit waits
             driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
             wait = new WebDriverWait(driver, Duration.ofSeconds(TestUtils.WAIT));
@@ -82,6 +85,16 @@ public class BaseTest {
         if (driver != null) {
             driver.quit();
         }
+    }
+
+    @BeforeMethod
+    public void beforeMethod() {
+        ((CanRecordScreen) driver).startRecordingScreen();
+    }
+
+    @AfterMethod
+    public void afterMethod() {
+        ((CanRecordScreen) driver).stopRecordingScreen();
     }
 
     public void closeApp() {
@@ -201,6 +214,14 @@ public class BaseTest {
         options.setCapability("appium:deviceName", deviceName);
     }
 
+    public AppiumDriver getDriver() {
+        return driver;
+    }
+
+    public String getDateTime() {
+        return dateTime;
+    }
+
     // Utility Methods
 
     /**
@@ -261,6 +282,7 @@ public class BaseTest {
             driver.executeScript("mobile: scroll", ImmutableMap.of(
                     "element", activity.getId(),
                     "toVisible", true
+//                    "predicateString", "label == '$29.99'" // проверка видимости, экспериментально
             ));
             return driver.findElement(AppiumBy.accessibilityId("test-Price"));
         }

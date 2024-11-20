@@ -20,9 +20,6 @@ public class LoginTests extends BaseTest {
     private ProductsPage productsPage; // Объект страницы с продуктами.
     private JSONObject loginUsers; // JSON-объект, содержащий данные для тестов логина.
 
-    /**
-     * Инициализация данных и страниц перед запуском класса тестов.
-     */
     @BeforeClass
     public void beforeClass() throws IOException {
         loginPage = new LoginPage();
@@ -30,47 +27,19 @@ public class LoginTests extends BaseTest {
         loginUsers = loadJsonData("data/loginUsers.json"); // Загрузка JSON-данных.
     }
 
-    /**
-     * Очистка ресурсов после выполнения тестового класса.
-     */
     @AfterClass
     public void afterClass() {
         closeApp(); // Закрытие приложения после завершения тестов.
     }
 
-    /**
-     * Логирование имени тестового метода перед его запуском.
-     */
     @BeforeMethod
     public void beforeMethod(Method method) {
         System.out.println("\n" + "************** " + method.getName() + " **************");
     }
 
-    /**
-     * Тест на проверку ошибки при вводе некорректного имени пользователя.
-     */
-    @Test(priority = 1)
-    public void invalidLoginTest() {
-        performLogin("invalidUser");
-        assertErrorMessage(strings.get("err_invalid_username_or_password"));
-    }
+    @AfterMethod
+    public void afterMethod() {
 
-    /**
-     * Тест на проверку ошибки при вводе некорректного пароля.
-     */
-    @Test(priority = 2)
-    public void invalidPasswordTest() {
-        performLogin("invalidPassword");
-        assertErrorMessage(strings.get("err_invalid_username_or_password"));
-    }
-
-    /**
-     * Тест на проверку успешного входа с корректным логином и паролем.
-     */
-    @Test(priority = 3)
-    public void validLoginAndPasswordTest() {
-        String title = performLogin("validLoginAndPassword").getTitle(); // Вход с валидными данными.
-        Assert.assertEquals(title, strings.get("product_title"), "Заголовок страницы не соответствует ожидаемому!");
     }
 
     /**
@@ -108,6 +77,26 @@ public class LoginTests extends BaseTest {
     private void assertErrorMessage(String expectedErrorMessage) {
         String actualErrorMessage = loginPage.getErrorMessage();
         Assert.assertEquals(actualErrorMessage, expectedErrorMessage, "Сообщение об ошибке не соответствует ожидаемому!");
+    }
+
+//======================================================================================================================
+
+    @Test(priority = 1)
+    public void invalidLoginTest() {
+        performLogin("invalidUser");
+        assertErrorMessage(strings.get("err_invalid_username_or_password"));
+    }
+
+    @Test(priority = 2)
+    public void invalidPasswordTest() {
+        performLogin("invalidPassword");
+        assertErrorMessage(strings.get("err_invalid_username_or_password"));
+    }
+
+    @Test(priority = 3)
+    public void validLoginAndPasswordTest() {
+        String title = performLogin("validLoginAndPassword").getTitle(); // Вход с валидными данными.
+        Assert.assertEquals(title, strings.get("product_title"), "Заголовок страницы не соответствует ожидаемому!");
     }
 }
 

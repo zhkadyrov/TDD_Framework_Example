@@ -18,6 +18,10 @@ public class ProductDetailsPage extends MenuPage {
     @iOSXCUITFindBy(accessibility = "test-Price")
     private WebElement slbPrice;
 
+    @AndroidFindBy(accessibility = "test-ADD TO CART")
+    @iOSXCUITFindBy(accessibility = "test-ADD TO CART")
+    private WebElement addToCartButton;
+
     @AndroidFindBy(accessibility = "test-BACK TO PRODUCTS")
     @iOSXCUITFindBy(accessibility = "test-BACK TO PRODUCTS")
     private WebElement backToProductsButton;
@@ -46,7 +50,14 @@ public class ProductDetailsPage extends MenuPage {
     public ProductDetailsPage scrollToSlbPrice() {
         scrollToElement();
         waitForVisibility(slbPrice);
+        System.out.println("scrolling to SLB price");
         return this;
+    }
+
+    public boolean isAddToCartButtonIsDisplayed() {
+        waitForVisibility(addToCartButton);
+        System.out.println("add to card button is displayed");
+        return addToCartButton.isDisplayed();
     }
 
     public ProductsPage pressBackButton() {

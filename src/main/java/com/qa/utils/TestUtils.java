@@ -8,6 +8,9 @@ import org.w3c.dom.NodeList;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.InputStream;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 
 /**
@@ -54,6 +57,13 @@ public class TestUtils {
             }
         }
         return stringMap; // Возврат мапы.
+    }
+
+    public String getDateTime() {
+        DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss-dd.MM.yyyy");
+        Date date = new Date();
+        System.out.println(dateFormat.format(date));
+        return dateFormat.format(date);
     }
 }
 

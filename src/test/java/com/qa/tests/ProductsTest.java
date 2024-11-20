@@ -138,9 +138,14 @@ public class ProductsTest extends BaseTest {
 
         productDetailsPage.scrollToSlbPrice();
 
+        // Проверка цены продукта (SLB Price)
         softAssert.assertEquals(productDetailsPage.getSlbPrice(),
                 strings.get("product_details_slb_price"),
                 "SLB Price mismatch");
+
+        // Проверка видна ли кнопка Add to cart
+        softAssert.assertTrue(productDetailsPage.isAddToCartButtonIsDisplayed(),
+                "Add to cart button mismatch");
 
         // Переход обратно на страницу продуктов.
         productsPage = productDetailsPage.pressBackButton();

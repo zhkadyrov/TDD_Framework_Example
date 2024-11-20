@@ -5,7 +5,7 @@
         <listener class-name="com.qa.listeners.TestListener"/> <!-- Ваш слушатель -->
     </listeners>
 
-    <!-- Тест для Android -->
+    <!-- Тесты для Android -->
 <!--    <test name="Android Tests">-->
 <!--        <parameter name="platformName" value="Android"/>-->
 <!--        <parameter name="platformVersion" value="14"/>-->
@@ -21,7 +21,7 @@
 <!--        </classes>-->
 <!--    </test>-->
 
-    <!-- Тест для iOS-->
+    <!-- Тесты для iOS-->
     <test name="iOS Tests">
         <parameter name="platformName" value="iOS"/>
         <parameter name="platformVersion" value="17.5"/>
