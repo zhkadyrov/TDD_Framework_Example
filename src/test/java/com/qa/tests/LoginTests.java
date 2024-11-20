@@ -14,36 +14,20 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 
-@Listeners(TestListener.class) // Подключение listener'а для отслеживания событий тестов.
 public class LoginTests extends BaseTest {
-    LoginPage loginPage; // Объект страницы логина.
-    ProductsPage productsPage; // Объект страницы с продуктами.
-    InputStream inputStream; // Поток для чтения JSON-файла с данными.
-    JSONObject loginUsers; // JSON-объект, содержащий данные для тестов логина.
+
+    private LoginPage loginPage; // Объект страницы логина.
+    private ProductsPage productsPage; // Объект страницы с продуктами.
+    private JSONObject loginUsers; // JSON-объект, содержащий данные для тестов логина.
 
     /**
      * Инициализация данных и страниц перед запуском класса тестов.
      */
     @BeforeClass
     public void beforeClass() throws IOException {
-        loginPage = new LoginPage(driver); // Инициализация страницы логина.
-        productsPage = new ProductsPage(driver); // Инициализация страницы с продуктами.
-        String fileName = "data/loginUsers.json"; // Указание пути к JSON-файлу.
-
-        try {
-            // Чтение JSON-файла с данными пользователей.
-            inputStream = getClass().getClassLoader().getResourceAsStream(fileName);
-            JSONTokener jsonTokener = null;
-            if (inputStream != null) { jsonTokener = new JSONTokener(inputStream);}
-            if (jsonTokener != null) { loginUsers = new JSONObject(jsonTokener);} // Преобразование в JSON-объект.
-        } catch (Exception e) {
-            e.printStackTrace(); // Логирование ошибок при чтении файла.
-            throw e;
-        } finally {
-            if (inputStream != null) {
-                inputStream.close(); // Закрытие потока для предотвращения утечек ресурсов.
-            }
-        }
+        loginPage = new LoginPage();
+        productsPage = new ProductsPage();
+        loginUsers = loadJsonData("data/loginUsers.json"); // Загрузка JSON-данных.
     }
 
     /**
@@ -51,7 +35,7 @@ public class LoginTests extends BaseTest {
      */
     @AfterClass
     public void afterClass() {
-        // Здесь можно добавить очистку данных или сброс состояния приложения, если потребуется.
+        closeApp(); // Закрытие приложения после завершения тестов.
     }
 
     /**
@@ -63,56 +47,70 @@ public class LoginTests extends BaseTest {
     }
 
     /**
-     * Действия после каждого теста (пока ничего не выполняется).
-     */
-    @AfterMethod
-    public void afterMethod() {
-        // Можно добавить, например, сброс состояния приложения или выход из аккаунта.
-    }
-
-    /**
      * Тест на проверку ошибки при вводе некорректного имени пользователя.
      */
-    @Test
+    @Test(priority = 1)
     public void invalidLoginTest() {
-        loginPage.enterUserName(loginUsers.getJSONObject("invalidUser").getString("userName"))
-                .enterPassword(loginUsers.getJSONObject("invalidUser").getString("password"))
-                .pressLoginButton(); // Выполнение ввода и нажатие кнопки логина.
-
-        String errorMessage = loginPage.getErrorMessage(); // Получение текста ошибки.
-
-        // Проверка соответствия текста ошибки значению из XML-строк.
-        Assert.assertEquals(errorMessage, strings.get("err_invalid_username_or_password"));
+        performLogin("invalidUser");
+        assertErrorMessage(strings.get("err_invalid_username_or_password"));
     }
 
     /**
      * Тест на проверку ошибки при вводе некорректного пароля.
      */
-    @Test
+    @Test(priority = 2)
     public void invalidPasswordTest() {
-        loginPage.enterUserName(loginUsers.getJSONObject("invalidPassword").getString("userName"))
-                .enterPassword(loginUsers.getJSONObject("invalidPassword").getString("password"))
-                .pressLoginButton();
-
-        String errorMessage = loginPage.getErrorMessage();
-
-        Assert.assertEquals(errorMessage, strings.get("err_invalid_username_or_password"));
+        performLogin("invalidPassword");
+        assertErrorMessage(strings.get("err_invalid_username_or_password"));
     }
 
     /**
      * Тест на проверку успешного входа с корректным логином и паролем.
      */
-    @Test
+    @Test(priority = 3)
     public void validLoginAndPasswordTest() {
-        String title = loginPage.enterUserName(loginUsers.getJSONObject("validLoginAndPassword").getString("userName"))
-                .enterPassword(loginUsers.getJSONObject("validLoginAndPassword").getString("password"))
-                .pressLoginButton()
-                .getTitle(); // Получение заголовка страницы после успешного входа.
+        String title = performLogin("validLoginAndPassword").getTitle(); // Вход с валидными данными.
+        Assert.assertEquals(title, strings.get("product_title"), "Заголовок страницы не соответствует ожидаемому!");
+    }
 
-        // Проверка соответствия заголовка значениям из XML-строк.
-        Assert.assertEquals(title, strings.get("product_title"));
+    /**
+     * Метод для загрузки JSON-данных из указанного файла.
+     */
+    private JSONObject loadJsonData(String fileName) throws IOException {
+        try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(fileName)) {
+            if (inputStream == null) {
+                throw new IOException("Файл JSON не найден: " + fileName);
+            }
+            return new JSONObject(new JSONTokener(inputStream));
+        }
+    }
+
+    /**
+     * Универсальный метод для выполнения логина.
+     *
+     * @param userKey Ключ пользователя из JSON-данных (e.g., "invalidUser", "validLoginAndPassword").
+     * @return Продуктовая страница или текущая страница, если логин не удался.
+     */
+    private ProductsPage performLogin(String userKey) {
+        String userName = loginUsers.getJSONObject(userKey).getString("userName");
+        String password = loginUsers.getJSONObject(userKey).getString("password");
+
+        return loginPage.enterUserName(userName)
+                .enterPassword(password)
+                .pressLoginButton();
+    }
+
+    /**
+     * Проверяет сообщение об ошибке на странице логина.
+     *
+     * @param expectedErrorMessage Ожидаемое сообщение об ошибке.
+     */
+    private void assertErrorMessage(String expectedErrorMessage) {
+        String actualErrorMessage = loginPage.getErrorMessage();
+        Assert.assertEquals(actualErrorMessage, expectedErrorMessage, "Сообщение об ошибке не соответствует ожидаемому!");
     }
 }
+
 
 
 

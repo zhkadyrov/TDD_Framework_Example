@@ -6,24 +6,34 @@
     </listeners>
 
     <!-- Тест для Android -->
-    <test name="Android Tests">
-        <parameter name="platformName" value="Android"/>
-        <parameter name="platformVersion" value="14"/>
-        <parameter name="deviceName" value="Pixel_5_API_34"/>
-        <parameter name="emulator" value="true"/>
-        <classes>
-            <class name="com.qa.tests.LoginTests"/>
-        </classes>
-    </test>
+<!--    <test name="Android Tests">-->
+<!--        <parameter name="platformName" value="Android"/>-->
+<!--        <parameter name="platformVersion" value="14"/>-->
+<!--        <parameter name="deviceName" value="Pixel_5_API_34"/>-->
+<!--        <parameter name="emulator" value="true"/>-->
+<!--        <classes>-->
+<!--&lt;!&ndash;            <class name="com.qa.tests.LoginTests"/>&ndash;&gt;-->
+<!--            <class name="com.qa.tests.ProductsTest">-->
+<!--                <methods>-->
+<!--                    <include name="validateProductOnProductDetailsPage"/>-->
+<!--                </methods>-->
+<!--            </class>-->
+<!--        </classes>-->
+<!--    </test>-->
 
-    <!-- Тест для iOS -->
+    <!-- Тест для iOS-->
     <test name="iOS Tests">
         <parameter name="platformName" value="iOS"/>
         <parameter name="platformVersion" value="17.5"/>
         <parameter name="deviceName" value="iPhone SE (3rd generation)"/>
         <parameter name="emulator" value="true"/>
         <classes>
-            <class name="com.qa.tests.LoginTests"/>
+<!--            <class name="com.qa.tests.LoginTests"/>-->
+            <class name="com.qa.tests.ProductsTest">
+                <methods>
+                    <include name="validateProductOnProductDetailsPage"/>
+                </methods>
+            </class>
         </classes>
     </test>
 

@@ -23,8 +23,7 @@ public class LoginPage extends BaseTest {
     @iOSXCUITFindBy(accessibility = "test-Error message")
     private WebElement errorMessage;
 
-    public LoginPage(AppiumDriver driver) {
-        BaseTest.driver = driver;
+    public LoginPage() {
         PageFactory.initElements(new AppiumFieldDecorator(driver), this);
     }
 
@@ -32,22 +31,34 @@ public class LoginPage extends BaseTest {
     public LoginPage enterUserName(String name) {
         clearField(userNameInputField);
         sendKeys(userNameInputField, name);
+        System.out.println("login is: " + name);
         return this;
     }
 
     public LoginPage enterPassword(String password) {
         clearField(passwordInputField);
         sendKeys(passwordInputField, password);
+        System.out.println("password is: " + password);
         return this;
     }
 
     public ProductsPage pressLoginButton() {
         click(loginButton);
-        return new ProductsPage(driver);
+        System.out.println("press login button");
+        return new ProductsPage();
     }
 
     public String getErrorMessage() {
-        return getText(errorMessage);
+        String text = getText(errorMessage);
+        System.out.println("error text is: " + text);
+        return text;
+    }
+
+    public ProductsPage login(String username, String password) {
+        enterUserName(username);
+        enterPassword(password);
+        pressLoginButton();
+        return new ProductsPage();
     }
 }
 

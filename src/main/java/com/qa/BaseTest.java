@@ -1,14 +1,19 @@
 package com.qa;
 
+import com.google.common.collect.ImmutableMap;
 import com.qa.utils.TestUtils;
+import io.appium.java_client.AppiumBy;
 import io.appium.java_client.AppiumDriver;
+import io.appium.java_client.InteractsWithApps;
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.android.options.UiAutomator2Options;
 import io.appium.java_client.ios.IOSDriver;
 import io.appium.java_client.ios.options.XCUITestOptions;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.MutableCapabilities;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.remote.RemoteWebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.annotations.AfterTest;
@@ -79,6 +84,19 @@ public class BaseTest {
         }
     }
 
+    public void closeApp() {
+        switch (platform.toLowerCase()) {
+            case "android": ((InteractsWithApps) driver).terminateApp(properties.getProperty("androidAppPackage")); break;
+            case "ios": ((InteractsWithApps) driver).terminateApp(properties.getProperty("iosBundleId")); break;
+        }
+    }
+
+    public void launchApp() {
+        switch (platform.toLowerCase()) {
+            case "android": ((InteractsWithApps) driver).activateApp(properties.getProperty("androidAppPackage")); break;
+            case "ios": ((InteractsWithApps) driver).activateApp(properties.getProperty("iosBundleId")); break;
+        }
+    }
     // Private Helper Methods
 
     /**
@@ -214,12 +232,6 @@ public class BaseTest {
     public void sendKeys(WebElement element, String text) {
         waitForVisibility(element);
         element.sendKeys(text);
-//        for (char c : text.toCharArray()) {
-//            element.sendKeys(String.valueOf(c));
-//            try {
-//                Thread.sleep(1); // Задержка между символами
-//            } catch (Exception e) {}
-//        }
     }
 
     /**
@@ -236,12 +248,25 @@ public class BaseTest {
 
     /**
      * Scrolls to a WebElement.
-     *
-     * @param element The WebElement to scroll to.
      */
-    public void scrollToElement(WebElement element) {
-        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView;", element);
+    public WebElement scrollToElement() {
+        if (platform.equalsIgnoreCase("android")) {
+            return driver.findElement(AppiumBy.androidUIAutomator(
+                    "new UiScrollable(new UiSelector().scrollable(true)).scrollIntoView("
+                            + "new UiSelector().description(\"test-Price\")"
+                            + ");"));
+        } else if (platform.equalsIgnoreCase("ios")) {
+            RemoteWebElement activity = (RemoteWebElement) driver.findElement(
+                    AppiumBy.accessibilityId("test-Price"));
+            driver.executeScript("mobile: scroll", ImmutableMap.of(
+                    "element", activity.getId(),
+                    "toVisible", true
+            ));
+            return driver.findElement(AppiumBy.accessibilityId("test-Price"));
+        }
+        return null;
     }
+
 
     public String getText(WebElement element) {
         return switch (platform.toLowerCase()) {

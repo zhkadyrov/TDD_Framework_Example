@@ -8,18 +8,51 @@ import io.appium.java_client.pagefactory.iOSXCUITFindBy;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.PageFactory;
 
-public class ProductsPage extends BaseTest {
+import java.awt.*;
+
+public class ProductsPage extends MenuPage {
     @AndroidFindBy(xpath = "//android.widget.TextView[@text=\"PRODUCTS\"]")
     @iOSXCUITFindBy(xpath = "//XCUIElementTypeStaticText[@name=\"PRODUCTS\"]")
     private WebElement productsPageTitle;
 
-    public ProductsPage(AppiumDriver driver) {
-        BaseTest.driver = driver;
+    @AndroidFindBy(xpath = "//android.widget.TextView[@content-desc=\"test-Item title\" and @text=\"Sauce Labs Backpack\"]")
+    @iOSXCUITFindBy(xpath = "//XCUIElementTypeStaticText[@name=\"test-Item title\" and @label=\"Sauce Labs Backpack\"]")
+    private WebElement slbTitle;
+
+    @AndroidFindBy(xpath = "//android.widget.TextView[@content-desc=\"test-Price\" and @text=\"$29.99\"]")
+    @iOSXCUITFindBy(xpath = "//XCUIElementTypeStaticText[@name=\"test-Price\" and @label=\"$29.99\"]")
+    private WebElement slbPrice;
+
+    public ProductsPage() {
         PageFactory.initElements(new AppiumFieldDecorator(driver), this);
     }
 
     public String getTitle() {
+        waitForVisibility(productsPageTitle);
+        String pageTitle = getText(productsPageTitle);
+        System.out.println("product page title is: " + pageTitle);
         return getText(productsPageTitle);
+    }
+
+    public String getSlbTitle() {
+        waitForVisibility(slbTitle);
+        String title = getText(slbTitle);
+        System.out.println("title is: " + title);
+        return getText(slbTitle);
+    }
+
+    public String getSlbPrice() {
+        waitForVisibility(slbPrice);
+        String price = getText(slbPrice);
+        System.out.println("price is: " + price);
+        return getText(slbPrice);
+    }
+
+    public ProductDetailsPage pressSlbTitle() {
+        waitForVisibility(slbTitle);
+        System.out.println("press SLB title");
+        click(slbTitle);
+        return new ProductDetailsPage();
     }
 }
 
