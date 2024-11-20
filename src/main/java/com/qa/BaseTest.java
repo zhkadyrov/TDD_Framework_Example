@@ -10,20 +10,23 @@ import io.appium.java_client.android.options.UiAutomator2Options;
 import io.appium.java_client.ios.IOSDriver;
 import io.appium.java_client.ios.options.XCUITestOptions;
 import io.appium.java_client.screenrecording.CanRecordScreen;
-import org.openqa.selenium.JavascriptExecutor;
+import org.apache.commons.codec.binary.Base64;
 import org.openqa.selenium.MutableCapabilities;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.RemoteWebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.ITestResult;
 import org.testng.annotations.*;
 
-import java.io.InputStream;
+import java.io.*;
 import java.net.URL;
 import java.time.Duration;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
+
+import static java.io.File.separator;
 
 /**
  * BaseTest is the foundational class for all test classes.
@@ -89,12 +92,40 @@ public class BaseTest {
 
     @BeforeMethod
     public void beforeMethod() {
+        System.out.println("BaseTest: beforeMethod");
         ((CanRecordScreen) driver).startRecordingScreen();
     }
 
     @AfterMethod
-    public void afterMethod() {
-        ((CanRecordScreen) driver).stopRecordingScreen();
+    public void afterMethod(ITestResult result) {
+        System.out.println("BaseTest: afterMethod");
+        String video = ((CanRecordScreen) driver).stopRecordingScreen();
+        Map<String, String> params = result.getTestContext().getCurrentXmlTest().getAllParameters();
+        String videoDir = "Reports" + separator
+                + "Videos" + separator
+                + "Platform: " + params.get("platformName") + separator
+                + "OS version: " + params.get("platformVersion") + separator
+                + "Device: " + params.get("deviceName") + separator
+                + "Date: " + getDateTime() + separator
+                + "Class: " + result.getTestClass().getRealClass().getSimpleName() + separator
+                + "Method: " + result.getName();
+
+        // Создаём директорию, если она не существует
+        File videoFolder = new File(videoDir);
+        if (!videoFolder.exists()) {
+            videoFolder.mkdirs();
+        }
+
+        // Формируем полный путь для файла
+        String videoFilePath = videoDir + separator + result.getName() + ".mp4";
+
+        // Сохраняем видео
+        try (FileOutputStream stream = new FileOutputStream(videoFilePath)) {
+            stream.write(Base64.decodeBase64(video));
+            System.out.println("Video saved at: " + videoFilePath);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void closeApp() {

@@ -41,13 +41,15 @@ public class TestListener implements ITestListener {
         Map<String, String> params = new HashMap<>();
         params = result.getTestContext().getCurrentXmlTest().getAllParameters();
 
-        String imagePath = "Screenshots" + separator
+        String imagePath = "Reports" + separator
+                + "Screenshots" + separator
                 + "Platform: " + params.get("platformName") + separator
-                + "Platform version: " + params.get("platformVersion") + " " + separator
-                + params.get("deviceName") + separator
+                + "OS version: " + params.get("platformVersion") + " " + separator
+                + "Device: " + params.get("deviceName") + separator
                 + "Date: " + baseTest.getDateTime() + separator
-                + "ClassName: " + result.getTestClass().getRealClass().getSimpleName() + separator
-                + "MethodName: " + result.getName() + ".png";
+                + "Class: " + result.getTestClass().getRealClass().getSimpleName() + separator
+                + "Method: " + result.getName()
+                + separator + result.getName() + ".png";
 
 //        String completeImagePath = System.getProperty("user.dir") + separator + imagePath;
 
