@@ -45,9 +45,9 @@ public class BaseTest {
     protected static ThreadLocal <String> dateTime = new ThreadLocal<String>();
     TestUtils testUtils;
 
-    public BaseTest() {
-        PageFactory.initElements(new AppiumFieldDecorator(getDriver()), this);
-    }
+//    public BaseTest() {
+//        PageFactory.initElements(new AppiumFieldDecorator(getDriver()), this);
+//    }
     public AppiumDriver getDriver() {
         return driver.get();
     }
@@ -129,12 +129,12 @@ public class BaseTest {
 
     @BeforeMethod
     public void beforeMethod() {
-        ((CanRecordScreen) driver).startRecordingScreen();
+        ((CanRecordScreen) getDriver()).startRecordingScreen();
     }
 
     @AfterMethod
     public synchronized void afterMethod(ITestResult result) {
-        String video = ((CanRecordScreen) driver).stopRecordingScreen();
+        String video = ((CanRecordScreen) getDriver()).stopRecordingScreen();
         if (result.getStatus() == 2) {
             // Получаем параметры текущего теста из XML-конфигурации
             Map<String, String> params = result.getTestContext().getCurrentXmlTest().getAllParameters();
@@ -193,7 +193,7 @@ public class BaseTest {
                         ? getProperty().getProperty("androidAppLocation")
                         : getProperty().getProperty("iosAppLocation")
         );
-        platform = platformName;
+//        platform = platformName;
 
         switch (platformName.toLowerCase()) {
             case "android":

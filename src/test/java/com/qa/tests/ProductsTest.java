@@ -21,15 +21,12 @@ import java.lang.reflect.Method;
  * Включает проверку отображения информации о продукте на странице продуктов и странице деталей продукта.
  */
 public class ProductsTest extends BaseTest {
-    private LoginPage loginPage; // Страница входа в систему.
-    private ProductsPage productsPage; // Страница продуктов.
-    private SettingsPage settingsPage; // Страница настроек.
-    private ProductDetailsPage productDetailsPage; // Страница деталей продукта.
-    private JSONObject loginUsers; // JSON-данные для авторизации.
+    private LoginPage loginPage;
+    private ProductsPage productsPage;
+    private SettingsPage settingsPage;
+    private ProductDetailsPage productDetailsPage;
+    private JSONObject loginUsers;
 
-    /**
-     * Инициализация страниц и загрузка данных перед запуском тестового класса.
-     */
     @BeforeClass
     public void beforeClass() throws IOException {
         loginPage = new LoginPage();
@@ -44,24 +41,13 @@ public class ProductsTest extends BaseTest {
     public void afterClass() {
         closeApp();
     }
-
     @BeforeMethod
     public void beforeMethod(Method method) {
         System.out.println("\n************** " + method.getName() + " **************");
         loginWithValidCredentials();
     }
-
-    /**
-     * Выполнение выхода из системы после каждого теста.
-     */
     @AfterMethod
     public void afterMethod() {
-        if (productsPage != null) { // TODO Эти 2 объекта мешают тестам успешно завершиться и записать видео при падении а так же не дают успешно отработать при верных входных данных, надо с этим что-то сделать, скорее всего создать класс BasePage и перенести все объекты страниц туда и наследовать все страницы Page от него
-//            settingsPage = productsPage.pressSettings(); // Переход на страницу настроек.
-//            loginPage = settingsPage.pressLogoutButton(); // Выход из системы.
-        } else {
-            System.err.println("No productsPage instance found. Skipping logout.");
-        }
     }
 
     private JSONObject loadJsonData(String fileName) throws IOException {
@@ -77,6 +63,12 @@ public class ProductsTest extends BaseTest {
         String password = loginUsers.getJSONObject("validLoginAndPassword").getString("password");
         productsPage = loginPage.login(userName, password); // Авторизация.
     }
+    private void logoutApp() {
+        productsPage.pressSettings();
+        settingsPage.pressLogoutButton();
+    }
+
+//======================================================================================================================
 
     @Test(priority = 1)
     public void validateProductOnProductPage() { // Проверяет отображение информации о продукте на странице продуктов.
@@ -93,6 +85,8 @@ public class ProductsTest extends BaseTest {
                 "SLB Price mismatch");
 
         softAssert.assertAll(); // Собираем все ошибки.
+
+        logoutApp();
     }
 
     @Test(priority = 2) // Проверяет отображение информации о продукте на странице деталей продукта.
@@ -128,6 +122,8 @@ public class ProductsTest extends BaseTest {
         Assert.assertNotNull(productsPage, "Failed to navigate back to Products Page");
 
         softAssert.assertAll(); // Собираем все ошибки.
+
+        logoutApp();
     }
 }
 
