@@ -97,18 +97,19 @@ public class BaseTest {
     @BeforeTest
     @Parameters({"emulator", "platformName", "platformVersion", "deviceName"})
     public void beforeTest(String emulator, String platformName, String platformVersion, String deviceName) throws Exception {
+        testUtils = new TestUtils();
+        InputStream inputStream;
+        InputStream stringsInputStream;
+        Properties props;
+
         try {
+            props = new Properties();
             setProperties(loadProperties("config.properties"));
             setStrings(loadStringResources("strings/strings.xml"));
             setDriver(initializeDriver(emulator, platformName, platformVersion, deviceName));
 
-            testUtils = new TestUtils();
-            InputStream inputStream;
-            InputStream stringsInputStream;
-
             setDateTime(testUtils.getDateTime());
 
-            // Configure implicit and explicit waits
             getDriver().manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
             setWait(new WebDriverWait(getDriver(), Duration.ofSeconds(TestUtils.WAIT)));
         } catch (Exception e) {
@@ -117,9 +118,27 @@ public class BaseTest {
         }
     }
 
-    /**
-     * AfterTest closes the AppiumDriver.
-     */
+    private Properties loadProperties(String fileName) throws Exception {
+        Properties props = new Properties();
+        inputStream = getClass().getClassLoader().getResourceAsStream(fileName);
+        if (inputStream == null) {
+            throw new Exception("Properties file not found: " + fileName);
+        }
+        props.load(inputStream);
+        inputStream.close();
+        return props;
+    }
+
+    private HashMap<String, String> loadStringResources(String fileName) throws Exception {
+        stringsInputStream = getClass().getClassLoader().getResourceAsStream(fileName);
+        if (stringsInputStream == null) {
+            throw new Exception("Strings file not found: " + fileName);
+        }
+        HashMap<String, String> parsedStrings = new TestUtils().parseStringXML(stringsInputStream);
+        stringsInputStream.close();
+        return parsedStrings;
+    }
+
     @AfterTest
     public void afterTest() {
         if (driver != null) {
@@ -196,41 +215,6 @@ public class BaseTest {
         }
     }
     // Private Helper Methods
-
-    /**
-     * Loads properties from the specified file.
-     *
-     * @param fileName The name of the properties file.
-     * @return The loaded Properties object.
-     * @throws Exception If the file cannot be loaded.
-     */
-    private Properties loadProperties(String fileName) throws Exception {
-        Properties props = new Properties();
-        inputStream = getClass().getClassLoader().getResourceAsStream(fileName);
-        if (inputStream == null) {
-            throw new Exception("Properties file not found: " + fileName);
-        }
-        props.load(inputStream);
-        inputStream.close();
-        return props;
-    }
-
-    /**
-     * Loads string resources from the specified XML file.
-     *
-     * @param fileName The name of the XML file.
-     * @return A HashMap containing the parsed strings.
-     * @throws Exception If the file cannot be loaded or parsed.
-     */
-    private HashMap<String, String> loadStringResources(String fileName) throws Exception {
-        stringsInputStream = getClass().getClassLoader().getResourceAsStream(fileName);
-        if (stringsInputStream == null) {
-            throw new Exception("Strings file not found: " + fileName);
-        }
-        HashMap<String, String> parsedStrings = new TestUtils().parseStringXML(stringsInputStream);
-        stringsInputStream.close();
-        return parsedStrings;
-    }
 
     /**
      * Initializes the AppiumDriver with the specified parameters.
