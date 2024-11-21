@@ -93,40 +93,60 @@ public class BaseTest {
     @BeforeMethod
     public void beforeMethod() {
         System.out.println("BaseTest: beforeMethod");
+        // Запускаем запись экрана перед каждым тестом но запись сохранится лишь в случае падения теста
         ((CanRecordScreen) driver).startRecordingScreen();
     }
 
     @AfterMethod
     public void afterMethod(ITestResult result) {
+        // Логируем, что метод afterMethod был вызван
         System.out.println("BaseTest: afterMethod");
+
+        // Выводим статус выполнения теста (1 = SUCCESS, 2 = FAILURE, 3 = SKIP)
+        System.out.println(result.getStatus());
+
+        // Останавливаем запись экрана и сохраняем видеоданные в виде строки Base64
         String video = ((CanRecordScreen) driver).stopRecordingScreen();
-        Map<String, String> params = result.getTestContext().getCurrentXmlTest().getAllParameters();
-        String videoDir = "Reports" + separator
-                + "Videos" + separator
-                + "Platform: " + params.get("platformName") + separator
-                + "OS version: " + params.get("platformVersion") + separator
-                + "Device: " + params.get("deviceName") + separator
-                + "Date: " + getDateTime() + separator
-                + "Class: " + result.getTestClass().getRealClass().getSimpleName() + separator
-                + "Method: " + result.getName();
 
-        // Создаём директорию, если она не существует
-        File videoFolder = new File(videoDir);
-        if (!videoFolder.exists()) {
-            videoFolder.mkdirs();
-        }
+        // Проверяем, завершился ли тест с ошибкой (код статуса 2)
+        if (result.getStatus() == 2) {
+            // Получаем параметры текущего теста из XML-конфигурации
+            Map<String, String> params = result.getTestContext().getCurrentXmlTest().getAllParameters();
 
-        // Формируем полный путь для файла
-        String videoFilePath = videoDir + separator + result.getName() + ".mp4";
+            // Формируем путь для сохранения видео, включая параметры платформы, устройства и теста
+            String videoDir = "Reports" + separator
+                    + "Videos" + separator
+                    + "Platform: " + params.get("platformName") + separator
+                    + "OS version: " + params.get("platformVersion") + separator
+                    + "Device: " + params.get("deviceName") + separator
+                    + "Date: " + getDateTime() + separator
+                    + "Class: " + result.getTestClass().getRealClass().getSimpleName() + separator
+                    + "Method: " + result.getName();
 
-        // Сохраняем видео
-        try (FileOutputStream stream = new FileOutputStream(videoFilePath)) {
-            stream.write(Base64.decodeBase64(video));
-            System.out.println("Video saved at: " + videoFilePath);
-        } catch (Exception e) {
-            e.printStackTrace();
+            // Создаём директорию для хранения видео, если она ещё не существует
+            File videoFolder = new File(videoDir);
+            if (!videoFolder.exists()) {
+                videoFolder.mkdirs(); // Создаёт все недостающие каталоги
+            }
+
+            // Формируем полный путь для файла видео, включая имя метода и расширение
+            String videoFilePath = videoDir + separator + result.getName() + ".mp4";
+
+            // Сохраняем видеозапись в файл
+            try (FileOutputStream stream = new FileOutputStream(videoFilePath)) {
+                // Декодируем строку Base64 в массив байтов и записываем их в файл
+                stream.write(Base64.decodeBase64(video));
+                // Уведомляем в консоли, что видео успешно сохранено
+                System.out.println("Video saved at: " + videoFilePath);
+            } catch (Exception e) {
+                // Обрабатываем возможные ошибки при записи файла
+                e.printStackTrace();
+            }
         }
     }
+
+
+
 
     public void closeApp() {
         switch (platform.toLowerCase()) {

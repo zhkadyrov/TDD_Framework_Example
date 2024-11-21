@@ -12,12 +12,8 @@
         <parameter name="deviceName" value="Pixel_5_API_34"/>
         <parameter name="emulator" value="true"/>
         <classes>
-<!--            <class name="com.qa.tests.LoginTests"/>-->
-            <class name="com.qa.tests.ProductsTest">
-                <methods>
-                    <include name="validateProductOnProductDetailsPage"/>
-                </methods>
-            </class>
+            <class name="com.qa.tests.LoginTests"/>
+            <class name="com.qa.tests.ProductsTest"/>
         </classes>
     </test>
 

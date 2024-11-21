@@ -36,9 +36,8 @@ public class ProductsTest extends BaseTest {
         productsPage = new ProductsPage();
         settingsPage = new SettingsPage();
         productDetailsPage = new ProductDetailsPage();
-
         loginUsers = loadJsonData("data/loginUsers.json"); // Загрузка данных для входа.
-        launchApp(); // Запуск приложения.
+        launchApp();
     }
 
     /**
@@ -63,9 +62,9 @@ public class ProductsTest extends BaseTest {
      */
     @AfterMethod
     public void afterMethod() {
-        if (productsPage != null) {
-            settingsPage = productsPage.pressSettings(); // Переход на страницу настроек.
-            loginPage = settingsPage.pressLogoutButton(); // Выход из системы.
+        if (productsPage != null) { // TODO Эти 2 объекта мешают тестам успешно завершиться и записать видео при падении а так же не дают успешно отработать при верных входных данных, надо с этим что-то сделать, скорее всего создать класс BasePage и перенести все объекты страниц туда и наследовать все страницы Page от него
+//            settingsPage = productsPage.pressSettings(); // Переход на страницу настроек.
+//            loginPage = settingsPage.pressLogoutButton(); // Выход из системы.
         } else {
             System.err.println("No productsPage instance found. Skipping logout.");
         }
