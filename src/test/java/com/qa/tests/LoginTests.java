@@ -84,19 +84,19 @@ public class LoginTests extends BaseTest {
     @Test(priority = 1)
     public void invalidLoginTest() {
         performLogin("invalidUser");
-        assertErrorMessage(strings.get("err_invalid_username_or_password"));
+        assertErrorMessage(getStrings().get("err_invalid_username_or_password"));
     }
 
     @Test(priority = 2)
     public void invalidPasswordTest() {
         performLogin("invalidPassword");
-        assertErrorMessage(strings.get("err_invalid_username_or_password"));
+        assertErrorMessage(getStrings().get("err_invalid_username_or_password"));
     }
 
     @Test(priority = 3)
     public void validLoginAndPasswordTest() {
         String title = performLogin("validLoginAndPassword").getTitle(); // Вход с валидными данными.
-        Assert.assertEquals(title, strings.get("product_title"), "Заголовок страницы не соответствует ожидаемому!");
+        Assert.assertEquals(title, getStrings().get("product_title"), "Заголовок страницы не соответствует ожидаемому!");
     }
 }
 

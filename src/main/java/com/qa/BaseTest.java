@@ -9,11 +9,14 @@ import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.android.options.UiAutomator2Options;
 import io.appium.java_client.ios.IOSDriver;
 import io.appium.java_client.ios.options.XCUITestOptions;
+import io.appium.java_client.pagefactory.AppiumFieldDecorator;
 import io.appium.java_client.screenrecording.CanRecordScreen;
 import org.apache.commons.codec.binary.Base64;
 import org.openqa.selenium.MutableCapabilities;
+import org.openqa.selenium.Platform;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.RemoteWebElement;
+import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.ITestResult;
@@ -33,19 +36,55 @@ import static java.io.File.separator;
  * It provides common setup, teardown, and utility methods for interacting with the AppiumDriver.
  */
 public class BaseTest {
-
     // Common resources shared across tests
-    protected static AppiumDriver driver;
-    protected static WebDriverWait wait;
-    protected static Properties properties;
-    protected static HashMap<String, String> strings = new HashMap<>();
-    protected static String platform;
-    protected static String dateTime;
-    protected TestUtils testUtils;
+    protected static ThreadLocal <AppiumDriver> driver = new ThreadLocal<AppiumDriver>();
+    protected static ThreadLocal <WebDriverWait> wait = new ThreadLocal<WebDriverWait>();
+    protected static ThreadLocal <Properties> properties = new ThreadLocal<Properties>();
+    protected static ThreadLocal <HashMap<String, String>> strings = new ThreadLocal<HashMap<String, String>>();
+    protected static ThreadLocal <String> platform = new ThreadLocal<String>();
+    protected static ThreadLocal <String> dateTime = new ThreadLocal<String>();
+    TestUtils testUtils;
 
-    // InputStreams for loading configuration files
-    private InputStream inputStream;
-    private InputStream stringsInputStream;
+    public BaseTest() {
+        PageFactory.initElements(new AppiumFieldDecorator(getDriver()), this);
+    }
+
+    public AppiumDriver getDriver() {
+        return driver.get();
+    }
+    public void setDriver(AppiumDriver driver1) {
+        driver.set(driver1);
+    }
+    public WebDriverWait getWait() {
+        return wait.get();
+    }
+    public void setWait(WebDriverWait wait1) {
+        wait.set(wait1);
+    }
+    public Properties getProperty() {
+        return properties.get();
+    }
+    public void setProperties(Properties properties1) {
+        properties.set(properties1);
+    }
+    public HashMap<String, String> getStrings() {
+        return strings.get();
+    }
+    public void setStrings(HashMap<String, String> strings1) {
+        strings.set(strings1);
+    }
+    public String getPlatform() {
+        return platform.get();
+    }
+    public void setPlatform(Platform platform1) {
+        platform.set(String.valueOf(platform1));
+    }
+    public String getDateTime() {
+        return dateTime.get();
+    }
+    public void setDateTime(String dateTime1) {
+        dateTime.set(dateTime1);
+    }
 
     /**
      * BeforeTest sets up the AppiumDriver and loads configuration and string resources.
@@ -59,21 +98,19 @@ public class BaseTest {
     @Parameters({"emulator", "platformName", "platformVersion", "deviceName"})
     public void beforeTest(String emulator, String platformName, String platformVersion, String deviceName) throws Exception {
         try {
-            // Load properties file
-            properties = loadProperties("config.properties");
-
-            // Load string resources
-            strings = loadStringResources("strings/strings.xml");
-
-            // Initialize AppiumDriver with desired capabilities
-            driver = initializeDriver(emulator, platformName, platformVersion, deviceName);
+            setProperties(loadProperties("config.properties"));
+            setStrings(loadStringResources("strings/strings.xml"));
+            setDriver(initializeDriver(emulator, platformName, platformVersion, deviceName));
 
             testUtils = new TestUtils();
-            dateTime = testUtils.getDateTime();
+            InputStream inputStream;
+            InputStream stringsInputStream;
+
+            setDateTime(testUtils.getDateTime());
 
             // Configure implicit and explicit waits
-            driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
-            wait = new WebDriverWait(driver, Duration.ofSeconds(TestUtils.WAIT));
+            getDriver().manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
+            setWait(new WebDriverWait(getDriver(), Duration.ofSeconds(TestUtils.WAIT)));
         } catch (Exception e) {
             e.printStackTrace();
             throw e; // Re-throw the exception to fail the test setup
@@ -86,7 +123,7 @@ public class BaseTest {
     @AfterTest
     public void afterTest() {
         if (driver != null) {
-            driver.quit();
+            getDriver().quit();
         }
     }
 
@@ -145,20 +182,17 @@ public class BaseTest {
         }
     }
 
-
-
-
     public void closeApp() {
-        switch (platform.toLowerCase()) {
-            case "android": ((InteractsWithApps) driver).terminateApp(properties.getProperty("androidAppPackage")); break;
-            case "ios": ((InteractsWithApps) driver).terminateApp(properties.getProperty("iosBundleId")); break;
+        switch (getPlatform().toLowerCase()) {
+            case "android": ((InteractsWithApps) driver).terminateApp(getProperty().getProperty("androidAppPackage")); break;
+            case "ios": ((InteractsWithApps) driver).terminateApp(getProperty().getProperty("iosBundleId")); break;
         }
     }
 
     public void launchApp() {
-        switch (platform.toLowerCase()) {
-            case "android": ((InteractsWithApps) driver).activateApp(properties.getProperty("androidAppPackage")); break;
-            case "ios": ((InteractsWithApps) driver).activateApp(properties.getProperty("iosBundleId")); break;
+        switch (getPlatform().toLowerCase()) {
+            case "android": ((InteractsWithApps) driver).activateApp(getProperty().getProperty("androidAppPackage")); break;
+            case "ios": ((InteractsWithApps) driver).activateApp(getProperty().getProperty("iosBundleId")); break;
         }
     }
     // Private Helper Methods
@@ -208,11 +242,11 @@ public class BaseTest {
      * @throws Exception If an error occurs during driver initialization.
      */
     private AppiumDriver initializeDriver(String emulator, String platformName, String platformVersion, String deviceName) throws Exception {
-        URL appiumServerUrl = new URL(properties.getProperty("appiumURL"));
+        URL appiumServerUrl = new URL(getProperty().getProperty("appiumURL"));
         URL appLocationPath = getClass().getClassLoader().getResource(
                 platformName.equalsIgnoreCase("android")
-                        ? properties.getProperty("androidAppLocation")
-                        : properties.getProperty("iosAppLocation")
+                        ? getProperty().getProperty("androidAppLocation")
+                        : getProperty().getProperty("iosAppLocation")
         );
         platform = platformName;
 
@@ -227,15 +261,15 @@ public class BaseTest {
                 }
 
 //                androidOptions.setCapability("appium:app", appLocationPath);
-                androidOptions.setCapability("appium:appPackage", properties.getProperty("androidAppPackage"));
-                androidOptions.setCapability("appium:appActivity", properties.getProperty("androidAppActivity"));
+                androidOptions.setCapability("appium:appPackage", getProperty().getProperty("androidAppPackage"));
+                androidOptions.setCapability("appium:appActivity", getProperty().getProperty("androidAppActivity"));
                 return new AndroidDriver(appiumServerUrl, androidOptions);
 
             case "ios":
                 XCUITestOptions iosOptions = new XCUITestOptions();
                 setCommonCapabilities(iosOptions, platformName, platformVersion, deviceName);
 //                iosOptions.setCapability("appium:app", appLocationPath);
-                iosOptions.setCapability("appium:bundleId", properties.getProperty("iosBundleId"));
+                iosOptions.setCapability("appium:bundleId", getProperty().getProperty("iosBundleId"));
 
                 if (emulator.equals("true")) {
                     iosOptions.setCapability("appium:simulatorStartupTimeout", 120_000);
@@ -254,23 +288,15 @@ public class BaseTest {
      */
     private void setCommonCapabilities(MutableCapabilities options, String platformName, String platformVersion, String deviceName) {
         if (platformName.equalsIgnoreCase("android")) {
-            options.setCapability("appium:automationName", properties.getProperty("androidAutomationName"));
+            options.setCapability("appium:automationName", getProperty().getProperty("androidAutomationName"));
         } else if (platformName.equalsIgnoreCase("ios")) {
-            options.setCapability("appium:automationName", properties.getProperty("iosAutomationName"));
+            options.setCapability("appium:automationName", getProperty().getProperty("iosAutomationName"));
         }
 
-        options.setCapability("appium:automationName", properties.getProperty(platformName.toLowerCase() + "AutomationName"));
+        options.setCapability("appium:automationName", getProperty().getProperty(platformName.toLowerCase() + "AutomationName"));
         options.setCapability("appium:platformName", platformName);
         options.setCapability("appium:platformVersion", platformVersion);
         options.setCapability("appium:deviceName", deviceName);
-    }
-
-    public AppiumDriver getDriver() {
-        return driver;
-    }
-
-    public String getDateTime() {
-        return dateTime;
     }
 
     // Utility Methods
@@ -281,7 +307,7 @@ public class BaseTest {
      * @param element The WebElement to wait for.
      */
     public void waitForVisibility(WebElement element) {
-        wait.until(ExpectedConditions.visibilityOf(element));
+        getWait().until(ExpectedConditions.visibilityOf(element));
     }
 
     /**
@@ -291,7 +317,7 @@ public class BaseTest {
      */
     public void click(WebElement element) {
         waitForVisibility(element);
-        wait.until(ExpectedConditions.elementToBeClickable(element));
+        getWait().until(ExpectedConditions.elementToBeClickable(element));
         element.click();
     }
 
@@ -322,27 +348,27 @@ public class BaseTest {
      * Scrolls to a WebElement.
      */
     public WebElement scrollToElement() {
-        if (platform.equalsIgnoreCase("android")) {
-            return driver.findElement(AppiumBy.androidUIAutomator(
+        if (getPlatform().equalsIgnoreCase("android")) {
+            return getDriver().findElement(AppiumBy.androidUIAutomator(
                     "new UiScrollable(new UiSelector().scrollable(true)).scrollIntoView("
                             + "new UiSelector().description(\"test-Price\")"
                             + ");"));
-        } else if (platform.equalsIgnoreCase("ios")) {
-            RemoteWebElement activity = (RemoteWebElement) driver.findElement(
+        } else if (getPlatform().equalsIgnoreCase("ios")) {
+            RemoteWebElement activity = (RemoteWebElement) getDriver().findElement(
                     AppiumBy.accessibilityId("test-Price"));
-            driver.executeScript("mobile: scroll", ImmutableMap.of(
+            getDriver().executeScript("mobile: scroll", ImmutableMap.of(
                     "element", activity.getId(),
                     "toVisible", true
 //                    "predicateString", "label == '$29.99'" // проверка видимости, экспериментально
             ));
-            return driver.findElement(AppiumBy.accessibilityId("test-Price"));
+            return getDriver().findElement(AppiumBy.accessibilityId("test-Price"));
         }
         return null;
     }
 
 
     public String getText(WebElement element) {
-        return switch (platform.toLowerCase()) {
+        return switch (getPlatform().toLowerCase()) {
             case "android" -> getAttribute(element, "text");
             case "ios" -> getAttribute(element, "label");
             default -> null;

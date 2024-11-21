@@ -14,7 +14,7 @@ public class MenuPage extends BaseTest {
     private WebElement pressSettings;
 
     public MenuPage() {
-        PageFactory.initElements(new AppiumFieldDecorator(driver), this);
+        PageFactory.initElements(new AppiumFieldDecorator(getDriver()), this);
     }
 
     public SettingsPage pressSettings() {

@@ -104,12 +104,12 @@ public class ProductsTest extends BaseTest {
 
         // Проверка заголовка продукта (SLB Title).
         softAssert.assertEquals(productsPage.getSlbTitle(),
-                strings.get("product_page_slb_title"),
+                getStrings().get("product_page_slb_title"),
                 "SLB Title mismatch");
 
         // Проверка цены продукта (SLB Price).
         softAssert.assertEquals(productsPage.getSlbPrice(),
-                strings.get("product_page_slb_price"),
+                getStrings().get("product_page_slb_price"),
                 "SLB Price mismatch");
 
         softAssert.assertAll(); // Собираем все ошибки.
@@ -127,19 +127,19 @@ public class ProductsTest extends BaseTest {
 
         // Проверка заголовка продукта (SLB Title).
         softAssert.assertEquals(productDetailsPage.getSlbTitle(),
-                strings.get("product_details_slb_title"),
+                getStrings().get("product_details_slb_title"),
                 "SLB Title mismatch");
 
         // Проверка описания продукта (SLB Text).
         softAssert.assertEquals(productDetailsPage.getSlbText(),
-                strings.get("product_details_slb_text"),
+                getStrings().get("product_details_slb_text"),
                 "SLB Text mismatch");
 
         productDetailsPage.scrollToSlbPrice();
 
         // Проверка цены продукта (SLB Price)
         softAssert.assertEquals(productDetailsPage.getSlbPrice(),
-                strings.get("product_details_slb_price"),
+                getStrings().get("product_details_slb_price"),
                 "SLB Price mismatch");
 
         // Проверка видна ли кнопка Add to cart

@@ -15,7 +15,7 @@ public class SettingsPage extends BaseTest {
     private WebElement logoutButton;
 
     public SettingsPage() {
-        PageFactory.initElements(new AppiumFieldDecorator(driver), this);
+        PageFactory.initElements(new AppiumFieldDecorator(getDriver()), this);
     }
 
     public LoginPage pressLogoutButton() {
