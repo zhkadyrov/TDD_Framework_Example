@@ -15,10 +15,9 @@ import java.io.InputStream;
 import java.lang.reflect.Method;
 
 public class LoginTests extends BaseTest {
-
-    private LoginPage loginPage; // Объект страницы логина.
-    private ProductsPage productsPage; // Объект страницы с продуктами.
-    private JSONObject loginUsers; // JSON-объект, содержащий данные для тестов логина.
+    LoginPage loginPage; // Объект страницы логина.
+    ProductsPage productsPage; // Объект страницы с продуктами.
+    JSONObject loginUsers; // JSON-объект, содержащий данные для тестов логина.
 
     @BeforeClass
     public void beforeClass() throws IOException {
@@ -29,7 +28,7 @@ public class LoginTests extends BaseTest {
 
     @AfterClass
     public void afterClass() {
-        closeApp(); // Закрытие приложения после завершения тестов.
+        closeApp();
     }
 
     @BeforeMethod
@@ -42,10 +41,7 @@ public class LoginTests extends BaseTest {
 
     }
 
-    /**
-     * Метод для загрузки JSON-данных из указанного файла.
-     */
-    private JSONObject loadJsonData(String fileName) throws IOException {
+    private JSONObject loadJsonData(String fileName) throws IOException { // Метод для загрузки JSON-данных из указанного файла.
         try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(fileName)) {
             if (inputStream == null) {
                 throw new IOException("Файл JSON не найден: " + fileName);
@@ -54,13 +50,7 @@ public class LoginTests extends BaseTest {
         }
     }
 
-    /**
-     * Универсальный метод для выполнения логина.
-     *
-     * @param userKey Ключ пользователя из JSON-данных (e.g., "invalidUser", "validLoginAndPassword").
-     * @return Продуктовая страница или текущая страница, если логин не удался.
-     */
-    private ProductsPage performLogin(String userKey) {
+    private ProductsPage performLogin(String userKey) { // Универсальный метод для выполнения авторизации.
         String userName = loginUsers.getJSONObject(userKey).getString("userName");
         String password = loginUsers.getJSONObject(userKey).getString("password");
 
@@ -69,34 +59,24 @@ public class LoginTests extends BaseTest {
                 .pressLoginButton();
     }
 
-    /**
-     * Проверяет сообщение об ошибке на странице логина.
-     *
-     * @param expectedErrorMessage Ожидаемое сообщение об ошибке.
-     */
-    private void assertErrorMessage(String expectedErrorMessage) {
-        String actualErrorMessage = loginPage.getErrorMessage();
-        Assert.assertEquals(actualErrorMessage, expectedErrorMessage, "Сообщение об ошибке не соответствует ожидаемому!");
-    }
-
 //======================================================================================================================
 
     @Test(priority = 1)
     public void invalidLoginTest() {
         performLogin("invalidUser");
-        assertErrorMessage(getStrings().get("err_invalid_username_or_password"));
+        Assert.assertEquals(loginPage.getErrorMessage(), getStrings().get("err_invalid_username_or_password"));
     }
 
     @Test(priority = 2)
     public void invalidPasswordTest() {
         performLogin("invalidPassword");
-        assertErrorMessage(getStrings().get("err_invalid_username_or_password"));
+        Assert.assertEquals(loginPage.getErrorMessage(), getStrings().get("err_invalid_username_or_password"));
     }
 
     @Test(priority = 3)
     public void validLoginAndPasswordTest() {
         String title = performLogin("validLoginAndPassword").getTitle(); // Вход с валидными данными.
-        Assert.assertEquals(title, getStrings().get("product_title"), "Заголовок страницы не соответствует ожидаемому!");
+        Assert.assertEquals(title, getStrings().get("product_title"));
     }
 }
 

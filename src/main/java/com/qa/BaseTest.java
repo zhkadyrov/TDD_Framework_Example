@@ -48,7 +48,6 @@ public class BaseTest {
     public BaseTest() {
         PageFactory.initElements(new AppiumFieldDecorator(getDriver()), this);
     }
-
     public AppiumDriver getDriver() {
         return driver.get();
     }
@@ -76,8 +75,8 @@ public class BaseTest {
     public String getPlatform() {
         return platform.get();
     }
-    public void setPlatform(Platform platform1) {
-        platform.set(String.valueOf(platform1));
+    public void setPlatform(String platform1) {
+        platform.set(platform1);
     }
     public String getDateTime() {
         return dateTime.get();
@@ -86,57 +85,39 @@ public class BaseTest {
         dateTime.set(dateTime1);
     }
 
-    /**
-     * BeforeTest sets up the AppiumDriver and loads configuration and string resources.
-     *
-     * @param platformName    The name of the mobile platform (e.g., Android).
-     * @param platformVersion The version of the platform.
-     * @param deviceName      The name of the device.
-     * @throws Exception If any error occurs during setup.
-     */
     @BeforeTest
     @Parameters({"emulator", "platformName", "platformVersion", "deviceName"})
     public void beforeTest(String emulator, String platformName, String platformVersion, String deviceName) throws Exception {
         testUtils = new TestUtils();
-        InputStream inputStream;
-        InputStream stringsInputStream;
+        setDateTime(testUtils.dateTime());
+        setPlatform(platformName);
+        InputStream inputStream = null;
+        InputStream stringsInputStream = null;
         Properties props;
 
         try {
             props = new Properties();
-            setProperties(loadProperties("config.properties"));
-            setStrings(loadStringResources("strings/strings.xml"));
-            setDriver(initializeDriver(emulator, platformName, platformVersion, deviceName));
+            inputStream = getClass().getClassLoader().getResourceAsStream("config.properties");
+            props.load(inputStream);
+            setProperties(props);
 
-            setDateTime(testUtils.getDateTime());
+            stringsInputStream = getClass().getClassLoader().getResourceAsStream("strings/strings.xml");
+
+            HashMap<String, String> parsedStrings = testUtils.parseStringXML(stringsInputStream);
+            setStrings(parsedStrings);
+
+            setDriver(initializeDriver(emulator, platformName, platformVersion, deviceName));
 
             getDriver().manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
             setWait(new WebDriverWait(getDriver(), Duration.ofSeconds(TestUtils.WAIT)));
+
         } catch (Exception e) {
             e.printStackTrace();
-            throw e; // Re-throw the exception to fail the test setup
+            throw e;
+        } finally {
+            if (inputStream != null) { inputStream.close(); }
+            if (stringsInputStream != null) { stringsInputStream.close(); }
         }
-    }
-
-    private Properties loadProperties(String fileName) throws Exception {
-        Properties props = new Properties();
-        inputStream = getClass().getClassLoader().getResourceAsStream(fileName);
-        if (inputStream == null) {
-            throw new Exception("Properties file not found: " + fileName);
-        }
-        props.load(inputStream);
-        inputStream.close();
-        return props;
-    }
-
-    private HashMap<String, String> loadStringResources(String fileName) throws Exception {
-        stringsInputStream = getClass().getClassLoader().getResourceAsStream(fileName);
-        if (stringsInputStream == null) {
-            throw new Exception("Strings file not found: " + fileName);
-        }
-        HashMap<String, String> parsedStrings = new TestUtils().parseStringXML(stringsInputStream);
-        stringsInputStream.close();
-        return parsedStrings;
     }
 
     @AfterTest
@@ -148,23 +129,12 @@ public class BaseTest {
 
     @BeforeMethod
     public void beforeMethod() {
-        System.out.println("BaseTest: beforeMethod");
-        // Запускаем запись экрана перед каждым тестом но запись сохранится лишь в случае падения теста
         ((CanRecordScreen) driver).startRecordingScreen();
     }
 
     @AfterMethod
-    public void afterMethod(ITestResult result) {
-        // Логируем, что метод afterMethod был вызван
-        System.out.println("BaseTest: afterMethod");
-
-        // Выводим статус выполнения теста (1 = SUCCESS, 2 = FAILURE, 3 = SKIP)
-        System.out.println(result.getStatus());
-
-        // Останавливаем запись экрана и сохраняем видеоданные в виде строки Base64
+    public synchronized void afterMethod(ITestResult result) {
         String video = ((CanRecordScreen) driver).stopRecordingScreen();
-
-        // Проверяем, завершился ли тест с ошибкой (код статуса 2)
         if (result.getStatus() == 2) {
             // Получаем параметры текущего теста из XML-конфигурации
             Map<String, String> params = result.getTestContext().getCurrentXmlTest().getAllParameters();
@@ -181,8 +151,9 @@ public class BaseTest {
 
             // Создаём директорию для хранения видео, если она ещё не существует
             File videoFolder = new File(videoDir);
-            if (!videoFolder.exists()) {
-                videoFolder.mkdirs(); // Создаёт все недостающие каталоги
+
+            synchronized (videoFolder) {
+                if (!videoFolder.exists()) { videoFolder.mkdirs(); }  // Создаёт все недостающие каталоги
             }
 
             // Формируем полный путь для файла видео, включая имя метода и расширение
@@ -203,28 +174,18 @@ public class BaseTest {
 
     public void closeApp() {
         switch (getPlatform().toLowerCase()) {
-            case "android": ((InteractsWithApps) driver).terminateApp(getProperty().getProperty("androidAppPackage")); break;
-            case "ios": ((InteractsWithApps) driver).terminateApp(getProperty().getProperty("iosBundleId")); break;
+            case "android": ((InteractsWithApps) getDriver()).terminateApp(getProperty().getProperty("androidAppPackage")); break;
+            case "ios": ((InteractsWithApps) getDriver()).terminateApp(getProperty().getProperty("iosBundleId")); break;
         }
     }
-
     public void launchApp() {
         switch (getPlatform().toLowerCase()) {
-            case "android": ((InteractsWithApps) driver).activateApp(getProperty().getProperty("androidAppPackage")); break;
-            case "ios": ((InteractsWithApps) driver).activateApp(getProperty().getProperty("iosBundleId")); break;
+            case "android": ((InteractsWithApps) getDriver()).activateApp(getProperty().getProperty("androidAppPackage")); break;
+            case "ios": ((InteractsWithApps) getDriver()).activateApp(getProperty().getProperty("iosBundleId")); break;
         }
     }
-    // Private Helper Methods
 
-    /**
-     * Initializes the AppiumDriver with the specified parameters.
-     *
-     * @param platformName    The name of the mobile platform.
-     * @param platformVersion The version of the platform.
-     * @param deviceName      The name of the device.
-     * @return The initialized AppiumDriver.
-     * @throws Exception If an error occurs during driver initialization.
-     */
+    // Private Helper Methods
     private AppiumDriver initializeDriver(String emulator, String platformName, String platformVersion, String deviceName) throws Exception {
         URL appiumServerUrl = new URL(getProperty().getProperty("appiumURL"));
         URL appLocationPath = getClass().getClassLoader().getResource(
@@ -266,10 +227,6 @@ public class BaseTest {
                 throw new IllegalArgumentException("Unknown platform: " + platformName);
         }
     }
-
-    /**
-     * Устанавливает общие капабилити для драйверов.
-     */
     private void setCommonCapabilities(MutableCapabilities options, String platformName, String platformVersion, String deviceName) {
         if (platformName.equalsIgnoreCase("android")) {
             options.setCapability("appium:automationName", getProperty().getProperty("androidAutomationName"));
@@ -284,53 +241,22 @@ public class BaseTest {
     }
 
     // Utility Methods
-
-    /**
-     * Waits for a WebElement to be visible.
-     *
-     * @param element The WebElement to wait for.
-     */
     public void waitForVisibility(WebElement element) {
         getWait().until(ExpectedConditions.visibilityOf(element));
     }
-
-    /**
-     * Clicks on a WebElement after ensuring it is clickable.
-     *
-     * @param element The WebElement to click on.
-     */
     public void click(WebElement element) {
         waitForVisibility(element);
         getWait().until(ExpectedConditions.elementToBeClickable(element));
         element.click();
     }
-
-    /**
-     * Sends text input to a WebElement.
-     *
-     * @param element The WebElement to send text to.
-     * @param text    The text to input.
-     */
     public void sendKeys(WebElement element, String text) {
         waitForVisibility(element);
         element.sendKeys(text);
     }
-
-    /**
-     * Retrieves the specified attribute of a WebElement.
-     *
-     * @param element The WebElement to query.
-     * @param key     The attribute name.
-     * @return The attribute value.
-     */
     public String getAttribute(WebElement element, String key) {
         waitForVisibility(element);
         return element.getAttribute(key);
     }
-
-    /**
-     * Scrolls to a WebElement.
-     */
     public WebElement scrollToElement() {
         if (getPlatform().equalsIgnoreCase("android")) {
             return getDriver().findElement(AppiumBy.androidUIAutomator(
@@ -349,8 +275,6 @@ public class BaseTest {
         }
         return null;
     }
-
-
     public String getText(WebElement element) {
         return switch (getPlatform().toLowerCase()) {
             case "android" -> getAttribute(element, "text");
@@ -358,7 +282,6 @@ public class BaseTest {
             default -> null;
         };
     }
-
     public void clearField(WebElement element) {
         waitForVisibility(element);
         element.clear();

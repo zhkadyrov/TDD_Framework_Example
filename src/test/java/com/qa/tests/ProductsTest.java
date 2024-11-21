@@ -40,21 +40,15 @@ public class ProductsTest extends BaseTest {
         launchApp();
     }
 
-    /**
-     * Завершение тестового класса: закрытие приложения.
-     */
     @AfterClass
     public void afterClass() {
         closeApp();
     }
 
-    /**
-     * Логирование текущего теста и выполнение входа в систему перед каждым тестом.
-     */
     @BeforeMethod
     public void beforeMethod(Method method) {
         System.out.println("\n************** " + method.getName() + " **************");
-        loginWithValidCredentials(); // Вход в систему перед каждым тестом.
+        loginWithValidCredentials();
     }
 
     /**
@@ -70,13 +64,6 @@ public class ProductsTest extends BaseTest {
         }
     }
 
-    /**
-     * Загрузка JSON-данных из файла.
-     *
-     * @param fileName имя файла JSON.
-     * @return объект JSON с данными.
-     * @throws IOException если файл не найден или произошла ошибка чтения.
-     */
     private JSONObject loadJsonData(String fileName) throws IOException {
         try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(fileName)) {
             if (inputStream == null) {
@@ -85,21 +72,14 @@ public class ProductsTest extends BaseTest {
             return new JSONObject(new JSONTokener(inputStream));
         }
     }
-
-    /**
-     * Выполняет вход в систему с корректными учетными данными.
-     */
     private void loginWithValidCredentials() {
         String userName = loginUsers.getJSONObject("validLoginAndPassword").getString("userName");
         String password = loginUsers.getJSONObject("validLoginAndPassword").getString("password");
         productsPage = loginPage.login(userName, password); // Авторизация.
     }
 
-    /**
-     * Проверяет отображение информации о продукте на странице продуктов.
-     */
     @Test(priority = 1)
-    public void validateProductOnProductPage() {
+    public void validateProductOnProductPage() { // Проверяет отображение информации о продукте на странице продуктов.
         SoftAssert softAssert = new SoftAssert();
 
         // Проверка заголовка продукта (SLB Title).
@@ -115,10 +95,7 @@ public class ProductsTest extends BaseTest {
         softAssert.assertAll(); // Собираем все ошибки.
     }
 
-    /**
-     * Проверяет отображение информации о продукте на странице деталей продукта.
-     */
-    @Test(priority = 2)
+    @Test(priority = 2) // Проверяет отображение информации о продукте на странице деталей продукта.
     public void validateProductOnProductDetailsPage() {
         SoftAssert softAssert = new SoftAssert();
 

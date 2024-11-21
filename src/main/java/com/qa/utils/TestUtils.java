@@ -59,7 +59,7 @@ public class TestUtils {
         return stringMap; // Возврат мапы.
     }
 
-    public String getDateTime() {
+    public String dateTime() {
         DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss-dd.MM.yyyy");
         Date date = new Date();
         System.out.println(dateFormat.format(date));
