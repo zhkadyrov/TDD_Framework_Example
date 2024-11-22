@@ -20,7 +20,7 @@ public class MenuPage extends BaseTest {
 
     public SettingsPage pressSettings() {
         waitForVisibility(pressSettings);
-        testUtils.log("press Settings button"); // <============
+        testUtils.log().info("press Settings button"); // <============
         click(pressSettings);
         return new SettingsPage();
     }

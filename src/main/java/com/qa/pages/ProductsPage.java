@@ -30,27 +30,27 @@ public class ProductsPage extends MenuPage {
     public String getTitle() {
         waitForVisibility(productsPageTitle);
         String pageTitle = getText(productsPageTitle);
-        testUtils.log("product page title is: " + pageTitle);
+        testUtils.log().info("product page title is: " + pageTitle);
         return getText(productsPageTitle);
     }
 
     public String getSlbTitle() {
         waitForVisibility(slbTitle);
         String title = getText(slbTitle);
-        testUtils.log("title is: " + title);
+        testUtils.log().info("title is: " + title);
         return getText(slbTitle);
     }
 
     public String getSlbPrice() {
         waitForVisibility(slbPrice);
         String price = getText(slbPrice);
-        testUtils.log("price is: " + price);
+        testUtils.log().info("price is: " + price);
         return getText(slbPrice);
     }
 
     public ProductDetailsPage pressSlbTitle() {
         waitForVisibility(slbTitle);
-        testUtils.log("press SLB title");
+        testUtils.log().info("press SLB title");
         click(slbTitle);
         return new ProductDetailsPage();
     }

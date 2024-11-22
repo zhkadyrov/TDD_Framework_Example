@@ -29,40 +29,40 @@ public class ProductDetailsPage extends MenuPage {
     public String getSlbTitle() {
         waitForVisibility(slbTitle);
         String title = getText(slbText);
-        testUtils.log("title is: " + title);
+        testUtils.log().info("title is: " + title);
         return getText(slbTitle);
     }
 
     public String getSlbText() {
         waitForVisibility(slbText);
         String text = getText(slbText);
-        testUtils.log("title is: " + text);
+        testUtils.log().info("title is: " + text);
         return getText(slbText);
     }
 
     public String getSlbPrice() {
         waitForVisibility(slbPrice);
         String text = getText(slbPrice);
-        testUtils.log("title is: " + text);
+        testUtils.log().info("title is: " + text);
         return getText(slbPrice);
     }
 
     public ProductDetailsPage scrollToSlbPrice() {
         scrollToElement();
         waitForVisibility(slbPrice);
-        testUtils.log("scrolling to SLB price");
+        testUtils.log().info("scrolling to SLB price");
         return this;
     }
 
     public boolean isAddToCartButtonIsDisplayed() {
         waitForVisibility(addToCartButton);
-        testUtils.log("add to card button is displayed");
+        testUtils.log().info("add to card button is displayed");
         return addToCartButton.isDisplayed();
     }
 
     public ProductsPage pressBackButton() {
         waitForVisibility(backToProductsButton);
-        testUtils.log("press back to product button");
+        testUtils.log().info("press back to product button");
         click(backToProductsButton);
         return new ProductsPage();
     }

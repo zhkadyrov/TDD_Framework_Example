@@ -1,7 +1,6 @@
 package com.qa.pages;
 
 import com.qa.BaseTest;
-import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.pagefactory.AndroidFindBy;
 import io.appium.java_client.pagefactory.AppiumFieldDecorator;
 import io.appium.java_client.pagefactory.iOSXCUITFindBy;
@@ -31,26 +30,26 @@ public class LoginPage extends BaseTest {
     public LoginPage enterUserName(String name) {
         clearField(userNameInputField);
         sendKeys(userNameInputField, name);
-        testUtils.log("login is: " + name);
+        testUtils.log().info("login is: " + name);
         return this;
     }
 
     public LoginPage enterPassword(String password) {
         clearField(passwordInputField);
         sendKeys(passwordInputField, password);
-        testUtils.log("password is: " + password);
+        testUtils.log().info("password is: " + password);
         return this;
     }
 
     public ProductsPage pressLoginButton() {
         click(loginButton);
-        testUtils.log("press login button");
+        testUtils.log().info("press login button");
         return new ProductsPage();
     }
 
     public String getErrorMessage() {
         String text = getText(errorMessage);
-        testUtils.log("error text is: " + text);
+        testUtils.log().info("error text is: " + text);
         return text;
     }
 

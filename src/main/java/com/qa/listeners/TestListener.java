@@ -35,7 +35,7 @@ public class TestListener implements ITestListener {
             result.getThrowable().printStackTrace(pw);
             // Выводим полный стек ошибки в консоль.
             System.out.println(sw.toString());
-            testUtils.log(sw.toString());
+            testUtils.log().info(sw.toString());
         }
 
         BaseTest baseTest = new BaseTest();

@@ -1,0 +1,12 @@
+[INFO ] 2024-11-22 16:26:41.722 LoginPage:33 - login is: invalid_username
+[INFO ] 2024-11-22 16:26:43.080 LoginPage:40 - password is: secret_sauce
+[INFO ] 2024-11-22 16:26:44.125 LoginPage:46 - press login button
+[INFO ] 2024-11-22 16:26:45.662 LoginPage:52 - error text is: Username and password do not match any user in this service.
+[INFO ] 2024-11-22 16:26:48.198 LoginPage:33 - login is: standard_user
+[INFO ] 2024-11-22 16:26:49.937 LoginPage:40 - password is: invalid_password
+[INFO ] 2024-11-22 16:26:51.002 LoginPage:46 - press login button
+[INFO ] 2024-11-22 16:26:51.770 LoginPage:52 - error text is: Username and password do not match any user in this service.
+[INFO ] 2024-11-22 16:26:54.387 LoginPage:33 - login is: standard_user
+[INFO ] 2024-11-22 16:26:56.122 LoginPage:40 - password is: secret_sauce
+[INFO ] 2024-11-22 16:26:57.215 LoginPage:46 - press login button
+[INFO ] 2024-11-22 16:26:58.613 ProductsPage:33 - product page title is: PRODUCTS

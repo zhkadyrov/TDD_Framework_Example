@@ -9,14 +9,13 @@ import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.android.options.UiAutomator2Options;
 import io.appium.java_client.ios.IOSDriver;
 import io.appium.java_client.ios.options.XCUITestOptions;
-import io.appium.java_client.pagefactory.AppiumFieldDecorator;
 import io.appium.java_client.screenrecording.CanRecordScreen;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.MutableCapabilities;
-import org.openqa.selenium.Platform;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.RemoteWebElement;
-import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.ITestResult;
@@ -45,6 +44,7 @@ public class BaseTest {
     protected static ThreadLocal <String> device = new ThreadLocal<String>();
     protected static ThreadLocal <String> dateTime = new ThreadLocal<String>();
     public TestUtils testUtils = new TestUtils();
+    private static final Logger log = LogManager.getLogger(BaseTest.class.getName());
 
     public AppiumDriver getDriver() {
         return driver.get();
