@@ -31,26 +31,26 @@ public class LoginPage extends BaseTest {
     public LoginPage enterUserName(String name) {
         clearField(userNameInputField);
         sendKeys(userNameInputField, name);
-        System.out.println("login is: " + name);
+        testUtils.log("login is: " + name);
         return this;
     }
 
     public LoginPage enterPassword(String password) {
         clearField(passwordInputField);
         sendKeys(passwordInputField, password);
-        System.out.println("password is: " + password);
+        testUtils.log("password is: " + password);
         return this;
     }
 
     public ProductsPage pressLoginButton() {
         click(loginButton);
-        System.out.println("press login button");
+        testUtils.log("press login button");
         return new ProductsPage();
     }
 
     public String getErrorMessage() {
         String text = getText(errorMessage);
-        System.out.println("error text is: " + text);
+        testUtils.log("error text is: " + text);
         return text;
     }
 

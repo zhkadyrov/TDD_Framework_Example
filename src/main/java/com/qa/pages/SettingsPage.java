@@ -20,6 +20,7 @@ public class SettingsPage extends BaseTest {
 
     public LoginPage pressLogoutButton() {
         waitForVisibility(logoutButton);
+        testUtils.log("press logout button");
         click(logoutButton);
         return new LoginPage();
     }

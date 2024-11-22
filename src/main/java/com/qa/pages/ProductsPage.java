@@ -30,31 +30,30 @@ public class ProductsPage extends MenuPage {
     public String getTitle() {
         waitForVisibility(productsPageTitle);
         String pageTitle = getText(productsPageTitle);
-        System.out.println("product page title is: " + pageTitle);
+        testUtils.log("product page title is: " + pageTitle);
         return getText(productsPageTitle);
     }
 
     public String getSlbTitle() {
         waitForVisibility(slbTitle);
         String title = getText(slbTitle);
-        System.out.println("title is: " + title);
+        testUtils.log("title is: " + title);
         return getText(slbTitle);
     }
 
     public String getSlbPrice() {
         waitForVisibility(slbPrice);
         String price = getText(slbPrice);
-        System.out.println("price is: " + price);
+        testUtils.log("price is: " + price);
         return getText(slbPrice);
     }
 
     public ProductDetailsPage pressSlbTitle() {
         waitForVisibility(slbTitle);
-        System.out.println("press SLB title");
+        testUtils.log("press SLB title");
         click(slbTitle);
         return new ProductDetailsPage();
     }
 }
 
 
-// //XCUIElementTypeOther[@name=\"test-Toggle\"]

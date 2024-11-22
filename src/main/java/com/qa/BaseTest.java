@@ -42,12 +42,10 @@ public class BaseTest {
     protected static ThreadLocal <Properties> properties = new ThreadLocal<Properties>();
     protected static ThreadLocal <HashMap<String, String>> strings = new ThreadLocal<HashMap<String, String>>();
     protected static ThreadLocal <String> platform = new ThreadLocal<String>();
+    protected static ThreadLocal <String> device = new ThreadLocal<String>();
     protected static ThreadLocal <String> dateTime = new ThreadLocal<String>();
-    TestUtils testUtils;
+    public TestUtils testUtils = new TestUtils();
 
-//    public BaseTest() {
-//        PageFactory.initElements(new AppiumFieldDecorator(getDriver()), this);
-//    }
     public AppiumDriver getDriver() {
         return driver.get();
     }
@@ -78,6 +76,12 @@ public class BaseTest {
     public void setPlatform(String platform1) {
         platform.set(platform1);
     }
+    public String getDeviceName() {
+        return device.get();
+    }
+    public void setDeviceName(String device1) {
+        device.set(device1);
+    }
     public String getDateTime() {
         return dateTime.get();
     }
@@ -86,11 +90,11 @@ public class BaseTest {
     }
 
     @BeforeTest
-    @Parameters({"emulator", "platformName", "platformVersion", "deviceName"})
-    public void beforeTest(String emulator, String platformName, String platformVersion, String deviceName) throws Exception {
-        testUtils = new TestUtils();
+    @Parameters({"realDevice", "parallel" , "platformName", "platformVersion", "deviceName"})
+    public void beforeTest(String realDevice, String parallel, String platformName, String platformVersion, String deviceName) throws Exception {
         setDateTime(testUtils.dateTime());
         setPlatform(platformName);
+        setDeviceName(deviceName);
         InputStream inputStream = null;
         InputStream stringsInputStream = null;
         Properties props;
@@ -106,7 +110,7 @@ public class BaseTest {
             HashMap<String, String> parsedStrings = testUtils.parseStringXML(stringsInputStream);
             setStrings(parsedStrings);
 
-            setDriver(initializeDriver(emulator, platformName, platformVersion, deviceName));
+            setDriver(initializeDriver(realDevice, parallel, platformName, platformVersion, deviceName));
 
             getDriver().manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
             setWait(new WebDriverWait(getDriver(), Duration.ofSeconds(TestUtils.WAIT)));
@@ -186,40 +190,61 @@ public class BaseTest {
     }
 
     // Private Helper Methods
-    private AppiumDriver initializeDriver(String emulator, String platformName, String platformVersion, String deviceName) throws Exception {
-        URL appiumServerUrl = new URL(getProperty().getProperty("appiumURL"));
-        URL appLocationPath = getClass().getClassLoader().getResource(
-                platformName.equalsIgnoreCase("android")
-                        ? getProperty().getProperty("androidAppLocation")
-                        : getProperty().getProperty("iosAppLocation")
-        );
-//        platform = platformName;
+    private synchronized AppiumDriver initializeDriver(String realDevice, String parallel, String platformName,
+                                                       String platformVersion, String deviceName) throws Exception {
+        URL appiumServerUrl = null;
+        URL appLocationPath = null;
+
+        if (parallel.equalsIgnoreCase("true")) {
+            if (platformName.equalsIgnoreCase("android")) {
+                appiumServerUrl = new URL(getProperty().getProperty("appiumURLFirst"));
+                appLocationPath = getClass().getClassLoader().getResource(getProperty().getProperty("androidAppLocation"));
+            } else if (platformName.equalsIgnoreCase("ios")) {
+                appiumServerUrl = new URL(getProperty().getProperty("appiumURLSecond"));
+                appLocationPath = getClass().getClassLoader().getResource(getProperty().getProperty("iosAppLocation"));
+            }
+        } else {
+            appiumServerUrl = new URL(getProperty().getProperty("appiumURLFirst"));
+            appLocationPath = getClass().getClassLoader().getResource(
+                    platformName.equalsIgnoreCase("android")
+                            ? getProperty().getProperty("androidAppLocation")
+                            : getProperty().getProperty("iosAppLocation")
+            );
+        }
 
         switch (platformName.toLowerCase()) {
             case "android":
                 UiAutomator2Options androidOptions = new UiAutomator2Options();
                 setCommonCapabilities(androidOptions, platformName, platformVersion, deviceName);
-                if (emulator.equals("true")) {
-                    androidOptions.setCapability("appium:avd", deviceName); // Pixel_5_API_34
-                    androidOptions.setCapability("appium:avdLaunchTimeout", 120_000);
-                    androidOptions.setCapability("appium:newCommandTimeout", 120);
+
+                if (realDevice.equalsIgnoreCase("true")) {
+                    androidOptions.setCapability("appium:systemPort", "10000");
+                    androidOptions.setCapability("appium:chromeDriverPort", "11000");
                 }
 
 //                androidOptions.setCapability("appium:app", appLocationPath);
-                androidOptions.setCapability("appium:appPackage", getProperty().getProperty("androidAppPackage"));
-                androidOptions.setCapability("appium:appActivity", getProperty().getProperty("androidAppActivity"));
+                androidOptions.setCapability("appium:avd", deviceName); // Pixel_5_API_34
+                androidOptions.setCapability("appium:avdLaunchTimeout", 120_000);
+                androidOptions.setCapability("appium:newCommandTimeout", 120);
+                androidOptions.setCapability("appium:appPackage", getProperty()
+                        .getProperty("androidAppPackage"));
+                androidOptions.setCapability("appium:appActivity", getProperty()
+                        .getProperty("androidAppActivity"));
                 return new AndroidDriver(appiumServerUrl, androidOptions);
 
             case "ios":
                 XCUITestOptions iosOptions = new XCUITestOptions();
                 setCommonCapabilities(iosOptions, platformName, platformVersion, deviceName);
-//                iosOptions.setCapability("appium:app", appLocationPath);
                 iosOptions.setCapability("appium:bundleId", getProperty().getProperty("iosBundleId"));
 
-                if (emulator.equals("true")) {
-                    iosOptions.setCapability("appium:simulatorStartupTimeout", 120_000);
-                    iosOptions.setCapability("appium:newCommandTimeout", 120);
+                if (realDevice.equalsIgnoreCase("true")) {
+                    iosOptions.setCapability("wdaLocalPort", "10001");
+                    iosOptions.setCapability("webKitDebugProxyPort", "11001");
                 }
+
+//                iosOptions.setCapability("appium:app", appLocationPath);
+                iosOptions.setCapability("appium:simulatorStartupTimeout", 120_000);
+                iosOptions.setCapability("appium:newCommandTimeout", 120);
 
                 return new IOSDriver(appiumServerUrl, iosOptions);
 

@@ -1,6 +1,7 @@
 package com.qa.listeners;
 
 import com.qa.BaseTest;
+import com.qa.utils.TestUtils;
 import org.apache.commons.io.FileUtils;
 import org.openqa.selenium.OutputType;
 import org.testng.ITestListener;
@@ -17,6 +18,7 @@ import java.util.Map;
 import static java.io.File.separator;
 
 public class TestListener implements ITestListener {
+    TestUtils testUtils = new TestUtils();
 
     /**
      * Метод, который срабатывает при падении теста.
@@ -33,6 +35,7 @@ public class TestListener implements ITestListener {
             result.getThrowable().printStackTrace(pw);
             // Выводим полный стек ошибки в консоль.
             System.out.println(sw.toString());
+            testUtils.log(sw.toString());
         }
 
         BaseTest baseTest = new BaseTest();
@@ -50,8 +53,6 @@ public class TestListener implements ITestListener {
                 + "Class: " + result.getTestClass().getRealClass().getSimpleName() + separator
                 + "Method: " + result.getName()
                 + separator + result.getName() + ".png";
-
-//        String completeImagePath = System.getProperty("user.dir") + separator + imagePath;
 
         try {
             FileUtils.copyFile(screenShot, new File(imagePath));

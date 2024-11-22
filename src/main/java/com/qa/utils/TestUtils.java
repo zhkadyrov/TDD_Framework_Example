@@ -1,5 +1,6 @@
 package com.qa.utils;
 
+import com.qa.BaseTest;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -7,11 +8,13 @@ import org.w3c.dom.NodeList;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import java.io.InputStream;
+import java.io.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+
+import static java.io.File.separator;
 
 /**
  * Этот класс предназначен для вспомогательных операций, которые могут быть полезны в тестах.
@@ -62,10 +65,59 @@ public class TestUtils {
     public String dateTime() {
         DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss-dd.MM.yyyy");
         Date date = new Date();
-        System.out.println(dateFormat.format(date));
         return dateFormat.format(date);
     }
+
+    public void log(String text) {
+        BaseTest baseTest = new BaseTest();
+        String message = Thread.currentThread().getId() + ": " + baseTest.getPlatform() + ": " + baseTest.getDeviceName()
+                + ": " + Thread.currentThread().getStackTrace()[2].getClassName() + ": " + text;
+
+        System.out.println(message);
+
+        String stringFile = "Logs" + separator + baseTest.getPlatform() + "_" + baseTest.getDeviceName()
+                + separator + baseTest.getDateTime();
+
+        File logFile = new File(stringFile);
+
+        if (!logFile.exists()) {
+            logFile.mkdirs();
+        }
+
+        FileWriter fileWriter = null;
+
+        try {
+            fileWriter = new FileWriter(logFile + separator + "log.txt", true);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        PrintWriter printWriter = new PrintWriter(fileWriter);
+        printWriter.println(message);
+        printWriter.close();
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
