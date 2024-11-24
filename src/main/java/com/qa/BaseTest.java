@@ -10,9 +10,11 @@ import io.appium.java_client.android.options.UiAutomator2Options;
 import io.appium.java_client.ios.IOSDriver;
 import io.appium.java_client.ios.options.XCUITestOptions;
 import io.appium.java_client.screenrecording.CanRecordScreen;
+import io.appium.java_client.service.local.AppiumDriverLocalService;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 import org.openqa.selenium.MutableCapabilities;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.RemoteWebElement;
@@ -44,7 +46,10 @@ public class BaseTest {
     protected static ThreadLocal <String> device = new ThreadLocal<String>();
     protected static ThreadLocal <String> dateTime = new ThreadLocal<String>();
     public TestUtils testUtils = new TestUtils();
+    private static AppiumDriverLocalService server;
     private static final Logger log = LogManager.getLogger(BaseTest.class.getName());
+
+//======================================================================================================================
 
     public AppiumDriver getDriver() {
         return driver.get();
@@ -89,6 +94,16 @@ public class BaseTest {
         dateTime.set(dateTime1);
     }
 
+//======================================================================================================================
+    @BeforeSuite
+    public void beforeSuite() {
+        server = getAppiumServerDefault();
+    }
+
+    public AppiumDriverLocalService getAppiumServerDefault() {
+        return AppiumDriverLocalService.buildDefaultService();
+    }
+
     @BeforeTest
     @Parameters({"realDevice", "parallel" , "platformName", "platformVersion", "deviceName"})
     public void beforeTest(String realDevice, String parallel, String platformName, String platformVersion, String deviceName) throws Exception {
@@ -98,6 +113,13 @@ public class BaseTest {
         InputStream inputStream = null;
         InputStream stringsInputStream = null;
         Properties props;
+
+        String strFile = "Logs" + separator + platformName + separator + "_" + deviceName;
+        File logFile = new File(strFile);
+        if (!logFile.exists()) {
+            logFile.mkdirs();
+        }
+        ThreadContext.put("ROUTINGKEY", strFile);
 
         try {
             props = new Properties();
@@ -175,6 +197,8 @@ public class BaseTest {
             }
         }
     }
+
+//======================================================================================================================
 
     public void closeApp() {
         switch (getPlatform().toLowerCase()) {
