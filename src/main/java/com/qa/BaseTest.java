@@ -26,6 +26,7 @@ import org.testng.ITestResult;
 import org.testng.annotations.*;
 
 import java.io.*;
+import java.net.ServerSocket;
 import java.net.URL;
 import java.time.Duration;
 import java.util.HashMap;
@@ -99,16 +100,17 @@ public class BaseTest {
 //======================================================================================================================
     @BeforeSuite
     public void beforeSuite() {
+        ThreadContext.put("ROUTINGKEY", "ServerLogs");
         server = getAppiumService();
         server.start();
         server.clearOutPutStreams(); // Отключает вывод логов сервера в консоль
-        System.out.println("Appium server started");
+        testUtils.log().info("Appium server started");
     }
 
     @AfterSuite
     public void afterSuite() {
         server.stop();
-        System.out.println("Appium server stopped");
+        testUtils.log().info("Appium server stopped");
     }
 
     public AppiumDriverLocalService getAppiumService() {
@@ -119,15 +121,17 @@ public class BaseTest {
         return AppiumDriverLocalService.buildService(new AppiumServiceBuilder()
                 .usingDriverExecutable(new File("/opt/homebrew/opt/node@18/bin/node"))
                 .withAppiumJS(new File("/opt/homebrew/lib/node_modules/appium/build/lib/main.js"))
-                .usingPort(4723)
+                .usingPort(4724)
                 .withArgument(GeneralServerFlag.SESSION_OVERRIDE)
-                        .withLogFile(new File("Logs/server.log")) // Записывает логи сервера в файл server.log
+                        .withLogFile(new File("ServerLogs/server.log")) // Записывает логи сервера в файл server.log
 //                .withEnvironment(environment) // Optional
         );
     }
 
     @BeforeTest
     @Parameters({"realDevice", "parallel" , "platformName", "platformVersion", "deviceName"})
+//    @Optional("onlyAndroid") String systemPort, @Optional("onlyAndroid") String chromeDriverPort
+//    @Optional("iOSOnly") String wdaLocalPort, @Optional("iOSOnly") String webKitDebugProxyPort
     public void beforeTest(String realDevice, String parallel, String platformName, String platformVersion, String deviceName) throws Exception {
         setDateTime(testUtils.dateTime());
         setPlatform(platformName);
@@ -142,6 +146,7 @@ public class BaseTest {
             logFile.mkdirs();
         }
         ThreadContext.put("ROUTINGKEY", strFile);
+        testUtils.log().info("log path: " + strFile);
 
         try {
             props = new Properties();
@@ -282,7 +287,7 @@ public class BaseTest {
                     iosOptions.setCapability("webKitDebugProxyPort", "11001");
                 }
 
-//                iosOptions.setCapability("appium:app", appLocationPath);
+                iosOptions.setCapability("appium:app", appLocationPath);
                 iosOptions.setCapability("appium:simulatorStartupTimeout", 120_000);
                 iosOptions.setCapability("appium:newCommandTimeout", 120);
 
