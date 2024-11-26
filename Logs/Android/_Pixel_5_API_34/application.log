@@ -1,0 +1,9 @@
+[Logs/Android/_Pixel_5_API_34 INFO ] 2024-11-26 13:01:30.293 LoginPage:33 - login is: standard_user
+[Logs/Android/_Pixel_5_API_34 INFO ] 2024-11-26 13:01:31.930 LoginPage:40 - password is: secret_sauce
+[Logs/Android/_Pixel_5_API_34 INFO ] 2024-11-26 13:01:32.621 LoginPage:46 - press login button
+[Logs/Android/_Pixel_5_API_34 INFO ] 2024-11-26 13:01:34.597 ProductsPage:33 - product page title is: PRODUCTS
+[Logs/Android/_Pixel_5_API_34 INFO ] 2024-11-26 13:06:57.202 LoginPage:33 - login is: standard_user
+[Logs/Android/_Pixel_5_API_34 INFO ] 2024-11-26 13:06:58.853 LoginPage:40 - password is: secret_sauce
+[Logs/Android/_Pixel_5_API_34 INFO ] 2024-11-26 13:06:59.511 LoginPage:46 - press login button
+[Logs/Android/_Pixel_5_API_34 INFO ] 2024-11-26 13:07:01.557 ProductsPage:33 - product page title is: PRODUCTS
+[Logs/Android/_Pixel_5_API_34 INFO ] 2024-11-26 13:07:03.070 BaseTest:329 - All Android Emulators have been stopped.

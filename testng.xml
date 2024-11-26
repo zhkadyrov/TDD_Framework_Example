@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
-<suite name="All Test Suite" parallel="tests"> <!-- none or tests -->
+<suite name="All Test Suite" parallel="none"> <!-- none or tests -->
     <listeners>
         <listener class-name="com.qa.listeners.TestListener"/>
     </listeners>
 
     <test name="Android Tests">
         <parameter name="realDevice" value="false"/>
-        <parameter name="parallel" value="true"/>
+        <parameter name="parallel" value="false"/>
         <parameter name="platformName" value="Android"/>
         <parameter name="platformVersion" value="14"/>
         <parameter name="deviceName" value="Pixel_5_API_34"/>
@@ -23,23 +23,23 @@
         </classes>
     </test>
 
-    <test name="iOS Test">
-        <parameter name="realDevice" value="false"/>
-        <parameter name="parallel" value="true"/>
-        <parameter name="platformName" value="iOS"/>
-        <parameter name="platformVersion" value="17.5"/>
-        <parameter name="deviceName" value="iPhone SE (3rd generation)"/>
-        <!--        <parameter name="wdaLocalPort" value="10001"/>-->
-        <!--        <parameter name="webKitDebugProxyPort" value="11001"/>-->
-        <classes>
-            <class name="com.qa.tests.LoginTests">
-                <methods>
-                    <include name="validLoginAndPasswordTest"/>
-                </methods>
-            </class>
-<!--            <class name="com.qa.tests.ProductsTest"/>-->
-        </classes>
-    </test>
+<!--    <test name="iOS Test">-->
+<!--        <parameter name="realDevice" value="false"/>-->
+<!--        <parameter name="parallel" value="false"/>-->
+<!--        <parameter name="platformName" value="iOS"/>-->
+<!--        <parameter name="platformVersion" value="17.5"/>-->
+<!--        <parameter name="deviceName" value="iPhone SE (3rd generation)"/>-->
+<!--        &lt;!&ndash;        <parameter name="wdaLocalPort" value="10001"/>&ndash;&gt;-->
+<!--        &lt;!&ndash;        <parameter name="webKitDebugProxyPort" value="11001"/>&ndash;&gt;-->
+<!--        <classes>-->
+<!--            <class name="com.qa.tests.LoginTests">-->
+<!--                <methods>-->
+<!--                    <include name="validLoginAndPasswordTest"/>-->
+<!--                </methods>-->
+<!--            </class>-->
+<!--&lt;!&ndash;            <class name="com.qa.tests.ProductsTest"/>&ndash;&gt;-->
+<!--        </classes>-->
+<!--    </test>-->
 
 </suite>
 

@@ -11,6 +11,8 @@ import io.appium.java_client.ios.IOSDriver;
 import io.appium.java_client.ios.options.XCUITestOptions;
 import io.appium.java_client.screenrecording.CanRecordScreen;
 import io.appium.java_client.service.local.AppiumDriverLocalService;
+import io.appium.java_client.service.local.AppiumServiceBuilder;
+import io.appium.java_client.service.local.flags.GeneralServerFlag;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -97,11 +99,31 @@ public class BaseTest {
 //======================================================================================================================
     @BeforeSuite
     public void beforeSuite() {
-        server = getAppiumServerDefault();
+        server = getAppiumService();
+        server.start();
+        server.clearOutPutStreams(); // Отключает вывод логов сервера в консоль
+        System.out.println("Appium server started");
     }
 
-    public AppiumDriverLocalService getAppiumServerDefault() {
-        return AppiumDriverLocalService.buildDefaultService();
+    @AfterSuite
+    public void afterSuite() {
+        server.stop();
+        System.out.println("Appium server stopped");
+    }
+
+    public AppiumDriverLocalService getAppiumService() {
+//        Map<String, String> environment = new HashMap<>(); // Optional
+//        environment.put("PATH", "Содержимое PATH в системе" + System.getenv("PATH")); // echo $PATH
+
+
+        return AppiumDriverLocalService.buildService(new AppiumServiceBuilder()
+                .usingDriverExecutable(new File("/opt/homebrew/opt/node@18/bin/node"))
+                .withAppiumJS(new File("/opt/homebrew/lib/node_modules/appium/build/lib/main.js"))
+                .usingPort(4723)
+                .withArgument(GeneralServerFlag.SESSION_OVERRIDE)
+                        .withLogFile(new File("Logs/server.log")) // Записывает логи сервера в файл server.log
+//                .withEnvironment(environment) // Optional
+        );
     }
 
     @BeforeTest
@@ -151,6 +173,13 @@ public class BaseTest {
         if (driver != null) {
             getDriver().quit();
         }
+
+        // Остановка симуляторов и эмуляторов
+        if (getPlatform().equalsIgnoreCase("ios")){
+            stopIOSSimulator();
+        } else if (getPlatform().equalsIgnoreCase("android")) {
+            stopAndroidEmulator();
+        }
     }
 
     @BeforeMethod
@@ -199,19 +228,6 @@ public class BaseTest {
     }
 
 //======================================================================================================================
-
-    public void closeApp() {
-        switch (getPlatform().toLowerCase()) {
-            case "android": ((InteractsWithApps) getDriver()).terminateApp(getProperty().getProperty("androidAppPackage")); break;
-            case "ios": ((InteractsWithApps) getDriver()).terminateApp(getProperty().getProperty("iosBundleId")); break;
-        }
-    }
-    public void launchApp() {
-        switch (getPlatform().toLowerCase()) {
-            case "android": ((InteractsWithApps) getDriver()).activateApp(getProperty().getProperty("androidAppPackage")); break;
-            case "ios": ((InteractsWithApps) getDriver()).activateApp(getProperty().getProperty("iosBundleId")); break;
-        }
-    }
 
     // Private Helper Methods
     private synchronized AppiumDriver initializeDriver(String realDevice, String parallel, String platformName,
@@ -287,6 +303,49 @@ public class BaseTest {
         options.setCapability("appium:platformName", platformName);
         options.setCapability("appium:platformVersion", platformVersion);
         options.setCapability("appium:deviceName", deviceName);
+    }
+
+    public static void stopIOSSimulator() {
+        try {
+            String command = "xcrun simctl shutdown all";
+            Process process = new ProcessBuilder("/bin/bash", "-c", command).start();
+            int exitCode = process.waitFor();
+            if (exitCode == 0) {
+                log.info("All iOS Simulators have been stopped.");
+            } else {
+                log.error("Failed to stop iOS Simulators. Exit code: " + exitCode);
+            }
+        } catch (Exception e) {
+            log.error("Error while stopping iOS Simulators: ", e);
+        }
+    }
+
+    public static void stopAndroidEmulator() {
+        try {
+            String command = "adb emu kill";
+            Process process = new ProcessBuilder("/bin/bash", "-c", command).start();
+            int exitCode = process.waitFor();
+            if (exitCode == 0) {
+                log.info("All Android Emulators have been stopped.");
+            } else {
+                log.error("Failed to stop Android Emulators. Exit code: " + exitCode);
+            }
+        } catch (Exception e) {
+            log.error("Error while stopping Android Emulators: ", e);
+        }
+    }
+
+    public void closeApp() {
+        switch (getPlatform().toLowerCase()) {
+            case "android": ((InteractsWithApps) getDriver()).terminateApp(getProperty().getProperty("androidAppPackage")); break;
+            case "ios": ((InteractsWithApps) getDriver()).terminateApp(getProperty().getProperty("iosBundleId")); break;
+        }
+    }
+    public void launchApp() {
+        switch (getPlatform().toLowerCase()) {
+            case "android": ((InteractsWithApps) getDriver()).activateApp(getProperty().getProperty("androidAppPackage")); break;
+            case "ios": ((InteractsWithApps) getDriver()).activateApp(getProperty().getProperty("iosBundleId")); break;
+        }
     }
 
     // Utility Methods
