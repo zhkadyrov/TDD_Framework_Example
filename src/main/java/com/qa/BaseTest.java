@@ -98,19 +98,96 @@ public class BaseTest {
     }
 
 //======================================================================================================================
+
+    @BeforeMethod
+    public void beforeMethod() {
+        ((CanRecordScreen) getDriver()).startRecordingScreen();
+    }
+
+    @AfterMethod
+    public synchronized void afterMethod(ITestResult result) {
+        String video = ((CanRecordScreen) getDriver()).stopRecordingScreen();
+        if (result.getStatus() == 2) {
+            // Получаем параметры текущего теста из XML-конфигурации
+            Map<String, String> params = result.getTestContext().getCurrentXmlTest().getAllParameters();
+
+            // Формируем путь для сохранения видео, включая параметры платформы, устройства и теста
+            String videoDir = "Reports" + separator
+                    + "Videos" + separator
+                    + "Platform: " + params.get("platformName") + separator
+                    + "OS version: " + params.get("platformVersion") + separator
+                    + "Device: " + params.get("deviceName") + separator
+                    + "Date: " + getDateTime() + separator
+                    + "Class: " + result.getTestClass().getRealClass().getSimpleName() + separator
+                    + "Method: " + result.getName();
+
+            // Создаём директорию для хранения видео, если она ещё не существует
+            File videoFolder = new File(videoDir);
+
+            synchronized (videoFolder) {
+                if (!videoFolder.exists()) { videoFolder.mkdirs(); }  // Создаёт все недостающие каталоги
+            }
+
+            // Формируем полный путь для файла видео, включая имя метода и расширение
+            String videoFilePath = videoDir + separator + result.getName() + ".mp4";
+
+            // Сохраняем видеозапись в файл
+            try (FileOutputStream stream = new FileOutputStream(videoFilePath)) {
+                // Декодируем строку Base64 в массив байтов и записываем их в файл
+                stream.write(Base64.decodeBase64(video));
+                // Уведомляем в консоли, что видео успешно сохранено
+                System.out.println("Video saved at: " + videoFilePath);
+            } catch (Exception e) {
+                // Обрабатываем возможные ошибки при записи файла
+                e.printStackTrace();
+            }
+        }
+    }
+
+
     @BeforeSuite
     public void beforeSuite() {
         ThreadContext.put("ROUTINGKEY", "ServerLogs");
-        server = getAppiumService();
-        server.start();
-        server.clearOutPutStreams(); // Отключает вывод логов сервера в консоль
-        testUtils.log().info("Appium server started");
+		server = getAppiumService(); // -> If using Mac, uncomment this statement and comment below statement
+//        server = getAppiumServerDefault(); // -> If using Windows, uncomment this statement and comment above statement
+        try {
+            if(!checkIfAppiumServerIsRunnning(4723)) {
+                server.start();
+                server.clearOutPutStreams(); // -> Comment this if you want to see server logs in the console
+                testUtils.log().info("Appium server started");
+            } else {
+                testUtils.log().info("Appium server already running");
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public boolean checkIfAppiumServerIsRunnning(int port) throws Exception {
+        boolean isAppiumServerRunning = false;
+        ServerSocket socket;
+        try {
+            socket = new ServerSocket(port);
+            socket.close();
+        } catch (IOException e) {
+            System.out.println("1");
+            isAppiumServerRunning = true;
+        } finally {
+            socket = null;
+        }
+        return isAppiumServerRunning;
+    }
+
+    public AppiumDriverLocalService getAppiumServerDefault() {
+        return AppiumDriverLocalService.buildDefaultService();
     }
 
     @AfterSuite
     public void afterSuite() {
-        server.stop();
-        testUtils.log().info("Appium server stopped");
+        if(server.isRunning()){
+            server.stop();
+            testUtils.log().info("Appium server stopped");
+        }
     }
 
     public AppiumDriverLocalService getAppiumService() {
@@ -184,51 +261,6 @@ public class BaseTest {
             stopIOSSimulator();
         } else if (getPlatform().equalsIgnoreCase("android")) {
             stopAndroidEmulator();
-        }
-    }
-
-    @BeforeMethod
-    public void beforeMethod() {
-        ((CanRecordScreen) getDriver()).startRecordingScreen();
-    }
-
-    @AfterMethod
-    public synchronized void afterMethod(ITestResult result) {
-        String video = ((CanRecordScreen) getDriver()).stopRecordingScreen();
-        if (result.getStatus() == 2) {
-            // Получаем параметры текущего теста из XML-конфигурации
-            Map<String, String> params = result.getTestContext().getCurrentXmlTest().getAllParameters();
-
-            // Формируем путь для сохранения видео, включая параметры платформы, устройства и теста
-            String videoDir = "Reports" + separator
-                    + "Videos" + separator
-                    + "Platform: " + params.get("platformName") + separator
-                    + "OS version: " + params.get("platformVersion") + separator
-                    + "Device: " + params.get("deviceName") + separator
-                    + "Date: " + getDateTime() + separator
-                    + "Class: " + result.getTestClass().getRealClass().getSimpleName() + separator
-                    + "Method: " + result.getName();
-
-            // Создаём директорию для хранения видео, если она ещё не существует
-            File videoFolder = new File(videoDir);
-
-            synchronized (videoFolder) {
-                if (!videoFolder.exists()) { videoFolder.mkdirs(); }  // Создаёт все недостающие каталоги
-            }
-
-            // Формируем полный путь для файла видео, включая имя метода и расширение
-            String videoFilePath = videoDir + separator + result.getName() + ".mp4";
-
-            // Сохраняем видеозапись в файл
-            try (FileOutputStream stream = new FileOutputStream(videoFilePath)) {
-                // Декодируем строку Base64 в массив байтов и записываем их в файл
-                stream.write(Base64.decodeBase64(video));
-                // Уведомляем в консоли, что видео успешно сохранено
-                System.out.println("Video saved at: " + videoFilePath);
-            } catch (Exception e) {
-                // Обрабатываем возможные ошибки при записи файла
-                e.printStackTrace();
-            }
         }
     }
 
