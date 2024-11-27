@@ -1,0 +1,10 @@
+[Logs/Android/_Pixel_5_API_34 INFO ] 2024-11-27 10:25:38.504 BaseTest:226 - log path: Logs/Android/_Pixel_5_API_34
+[Logs/Android/_Pixel_5_API_34 INFO ] 2024-11-27 10:26:01.738 BaseTest:413 - login is: invalid_username
+[Logs/Android/_Pixel_5_API_34 INFO ] 2024-11-27 10:26:03.384 BaseTest:413 - password is: secret_sauce
+[Logs/Android/_Pixel_5_API_34 INFO ] 2024-11-27 10:26:04.699 BaseTest:400 - Press login button
+[Logs/Android/_Pixel_5_API_34 INFO ] 2024-11-27 10:26:06.323 LoginPage:49 - error text is: Username and password do not match any user in this service.
+[Logs/Android/_Pixel_5_API_34 INFO ] 2024-11-27 10:26:08.568 BaseTest:413 - login is: standard_user
+[Logs/Android/_Pixel_5_API_34 INFO ] 2024-11-27 10:26:09.738 BaseTest:413 - password is: invalid_password
+[Logs/Android/_Pixel_5_API_34 INFO ] 2024-11-27 10:26:10.828 BaseTest:400 - Press login button
+[Logs/Android/_Pixel_5_API_34 INFO ] 2024-11-27 10:26:11.752 LoginPage:49 - error text is: Username and password do not match any user in this service.
+[Logs/Android/_Pixel_5_API_34 INFO ] 2024-11-27 10:26:13.641 BaseTest:413 - login is: standard_user

@@ -1,14 +1,11 @@
 package com.qa.pages;
 
-import com.qa.BaseTest;
-import io.appium.java_client.AppiumDriver;
+import com.qa.MenuPage;
 import io.appium.java_client.pagefactory.AndroidFindBy;
 import io.appium.java_client.pagefactory.AppiumFieldDecorator;
 import io.appium.java_client.pagefactory.iOSXCUITFindBy;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.PageFactory;
-
-import java.awt.*;
 
 public class ProductsPage extends MenuPage {
     @AndroidFindBy(xpath = "//android.widget.TextView[@text=\"PRODUCTS\"]")
@@ -29,29 +26,22 @@ public class ProductsPage extends MenuPage {
 
     public String getTitle() {
         waitForVisibility(productsPageTitle);
-        String pageTitle = getText(productsPageTitle);
-        testUtils.log().info("product page title is: " + pageTitle);
-        return getText(productsPageTitle);
+        return getText(productsPageTitle, "product page title is: ");
     }
 
     public String getSlbTitle() {
         waitForVisibility(slbTitle);
-        String title = getText(slbTitle);
-        testUtils.log().info("title is: " + title);
-        return getText(slbTitle);
+        return getText(slbTitle, "title is: ");
     }
 
     public String getSlbPrice() {
         waitForVisibility(slbPrice);
-        String price = getText(slbPrice);
-        testUtils.log().info("price is: " + price);
-        return getText(slbPrice);
+        return getText(slbPrice, "price is: ");
     }
 
     public ProductDetailsPage pressSlbTitle() {
         waitForVisibility(slbTitle);
-        testUtils.log().info("press SLB title");
-        click(slbTitle);
+        click(slbTitle, "press SLB title");
         return new ProductDetailsPage();
     }
 }

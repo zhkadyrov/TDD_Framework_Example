@@ -1,6 +1,8 @@
 package com.qa.tests;
 
+import com.aventstack.extentreports.Status;
 import com.qa.BaseTest;
+import com.qa.ExtentReport;
 import com.qa.listeners.TestListener;
 import com.qa.pages.LoginPage;
 import com.qa.pages.ProductsPage;

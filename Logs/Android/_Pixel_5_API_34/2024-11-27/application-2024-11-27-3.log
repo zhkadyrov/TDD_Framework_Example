@@ -1,0 +1,10 @@
+[Logs/Android/_Pixel_5_API_34 INFO ] 2024-11-27 11:11:13.060 BaseTest:415 - login is: standard_user
+[Logs/Android/_Pixel_5_API_34 INFO ] 2024-11-27 11:11:14.739 BaseTest:415 - password is: invalid_password
+[Logs/Android/_Pixel_5_API_34 INFO ] 2024-11-27 11:11:15.904 BaseTest:402 - Press login button
+[Logs/Android/_Pixel_5_API_34 INFO ] 2024-11-27 11:11:16.328 BaseTest:450 - error text is: Username and password do not match any user in this service.
+[Logs/Android/_Pixel_5_API_34 INFO ] 2024-11-27 11:11:18.141 BaseTest:415 - login is: standard_user
+[Logs/Android/_Pixel_5_API_34 INFO ] 2024-11-27 11:11:19.751 BaseTest:415 - password is: secret_sauce
+[Logs/Android/_Pixel_5_API_34 INFO ] 2024-11-27 11:11:20.918 BaseTest:402 - Press login button
+[Logs/Android/_Pixel_5_API_34 INFO ] 2024-11-27 11:11:22.357 BaseTest:450 - product page title is: PRODUCTS
+[Logs/Android/_Pixel_5_API_34 INFO ] 2024-11-27 11:11:23.585 BaseTest:367 - All Android Emulators have been stopped.
+[Logs/Android/_Pixel_5_API_34 INFO ] 2024-11-27 11:11:28.823 BaseTest:190 - Appium server stopped

@@ -1,6 +1,7 @@
-package com.qa.pages;
+package com.qa;
 
 import com.qa.BaseTest;
+import com.qa.pages.SettingsPage;
 import com.qa.utils.TestUtils;
 import io.appium.java_client.pagefactory.AndroidFindBy;
 import io.appium.java_client.pagefactory.AppiumFieldDecorator;
@@ -20,8 +21,7 @@ public class MenuPage extends BaseTest {
 
     public SettingsPage pressSettings() {
         waitForVisibility(pressSettings);
-        testUtils.log().info("press Settings button"); // <============
-        click(pressSettings);
+        click(pressSettings, "press Settings button");
         return new SettingsPage();
     }
 }

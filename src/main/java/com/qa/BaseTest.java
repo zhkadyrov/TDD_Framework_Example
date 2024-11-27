@@ -1,5 +1,6 @@
 package com.qa;
 
+import com.aventstack.extentreports.Status;
 import com.google.common.collect.ImmutableMap;
 import com.qa.utils.TestUtils;
 import io.appium.java_client.AppiumBy;
@@ -32,15 +33,14 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.io.File.separator;
 
-/**
- * BaseTest is the foundational class for all test classes.
- * It provides common setup, teardown, and utility methods for interacting with the AppiumDriver.
- */
 public class BaseTest {
     // Common resources shared across tests
+    private static final ThreadLocal<Integer> appiumPort = ThreadLocal.withInitial(() -> 4723);
+    private static final AtomicInteger portCounter = new AtomicInteger(4723);
     protected static ThreadLocal <AppiumDriver> driver = new ThreadLocal<AppiumDriver>();
     protected static ThreadLocal <WebDriverWait> wait = new ThreadLocal<WebDriverWait>();
     protected static ThreadLocal <Properties> properties = new ThreadLocal<Properties>();
@@ -54,6 +54,7 @@ public class BaseTest {
 
 //======================================================================================================================
 
+    // Setters and Getters
     public AppiumDriver getDriver() {
         return driver.get();
     }
@@ -98,6 +99,37 @@ public class BaseTest {
     }
 
 //======================================================================================================================
+    @BeforeSuite
+    public void beforeSuite() {
+        ThreadContext.put("ROUTINGKEY", "ServerLogs");
+        server = getAppiumService(); // -> If using Mac, uncomment this statement and comment below statement
+        server.start();
+        server.clearOutPutStreams(); // -> Comment this if you want to see server logs in the console
+        testUtils.log().info("Appium server started");
+
+//        server = getAppiumServerDefault(); // -> If using Windows, uncomment this statement and comment above statement
+//        try {
+//            if(!checkIfAppiumServerIsRunnning(4723)) {
+//                server.start();
+//                server.clearOutPutStreams(); // -> Comment this if you want to see server logs in the console
+//                testUtils.log().info("Appium server started");
+//            } else {
+//                testUtils.log().info("Appium server already running");
+//            }
+//        } catch (Exception e) {
+//            throw new RuntimeException(e);
+//        }
+    }
+
+    @AfterSuite
+    public void afterSuite() {
+        if(server.isRunning()){
+            server.stop();
+            testUtils.log().info("Appium server stopped");
+        }
+    }
+
+// =====================================================================================================================
 
     @BeforeMethod
     public void beforeMethod() {
@@ -145,24 +177,6 @@ public class BaseTest {
     }
 
 
-    @BeforeSuite
-    public void beforeSuite() {
-        ThreadContext.put("ROUTINGKEY", "ServerLogs");
-		server = getAppiumService(); // -> If using Mac, uncomment this statement and comment below statement
-//        server = getAppiumServerDefault(); // -> If using Windows, uncomment this statement and comment above statement
-        try {
-            if(!checkIfAppiumServerIsRunnning(4723)) {
-                server.start();
-                server.clearOutPutStreams(); // -> Comment this if you want to see server logs in the console
-                testUtils.log().info("Appium server started");
-            } else {
-                testUtils.log().info("Appium server already running");
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     public boolean checkIfAppiumServerIsRunnning(int port) throws Exception {
         boolean isAppiumServerRunning = false;
         ServerSocket socket;
@@ -182,14 +196,6 @@ public class BaseTest {
         return AppiumDriverLocalService.buildDefaultService();
     }
 
-    @AfterSuite
-    public void afterSuite() {
-        if(server.isRunning()){
-            server.stop();
-            testUtils.log().info("Appium server stopped");
-        }
-    }
-
     public AppiumDriverLocalService getAppiumService() {
 //        Map<String, String> environment = new HashMap<>(); // Optional
 //        environment.put("PATH", "Содержимое PATH в системе" + System.getenv("PATH")); // echo $PATH
@@ -198,12 +204,14 @@ public class BaseTest {
         return AppiumDriverLocalService.buildService(new AppiumServiceBuilder()
                 .usingDriverExecutable(new File("/opt/homebrew/opt/node@18/bin/node"))
                 .withAppiumJS(new File("/opt/homebrew/lib/node_modules/appium/build/lib/main.js"))
-                .usingPort(4724)
+                .usingPort(4723)
                 .withArgument(GeneralServerFlag.SESSION_OVERRIDE)
                         .withLogFile(new File("ServerLogs/server.log")) // Записывает логи сервера в файл server.log
 //                .withEnvironment(environment) // Optional
         );
     }
+
+// =====================================================================================================================
 
     @BeforeTest
     @Parameters({"realDevice", "parallel" , "platformName", "platformVersion", "deviceName"})
@@ -266,7 +274,7 @@ public class BaseTest {
 
 //======================================================================================================================
 
-    // Private Helper Methods
+    // Driver initialization
     private synchronized AppiumDriver initializeDriver(String realDevice, String parallel, String platformName,
                                                        String platformVersion, String deviceName) throws Exception {
         URL appiumServerUrl = null;
@@ -342,6 +350,9 @@ public class BaseTest {
         options.setCapability("appium:deviceName", deviceName);
     }
 
+//======================================================================================================================
+
+    // Device management
     public static void stopIOSSimulator() {
         try {
             String command = "xcrun simctl shutdown all";
@@ -356,7 +367,6 @@ public class BaseTest {
             log.error("Error while stopping iOS Simulators: ", e);
         }
     }
-
     public static void stopAndroidEmulator() {
         try {
             String command = "adb emu kill";
@@ -371,7 +381,6 @@ public class BaseTest {
             log.error("Error while stopping Android Emulators: ", e);
         }
     }
-
     public void closeApp() {
         switch (getPlatform().toLowerCase()) {
             case "android": ((InteractsWithApps) getDriver()).terminateApp(getProperty().getProperty("androidAppPackage")); break;
@@ -385,6 +394,8 @@ public class BaseTest {
         }
     }
 
+//======================================================================================================================
+
     // Utility Methods
     public void waitForVisibility(WebElement element) {
         getWait().until(ExpectedConditions.visibilityOf(element));
@@ -394,15 +405,28 @@ public class BaseTest {
         getWait().until(ExpectedConditions.elementToBeClickable(element));
         element.click();
     }
+    public void click(WebElement element, String message) {
+        waitForVisibility(element);
+        getWait().until(ExpectedConditions.elementToBeClickable(element));
+        testUtils.log().info(message);
+        ExtentReport.getTest().log(Status.INFO, message);
+        element.click();
+    }
     public void sendKeys(WebElement element, String text) {
         waitForVisibility(element);
+        element.sendKeys(text);
+    }
+    public void sendKeys(WebElement element, String text, String message) {
+        waitForVisibility(element);
+        testUtils.log().info(message);
+        ExtentReport.getTest().log(Status.INFO, message);
         element.sendKeys(text);
     }
     public String getAttribute(WebElement element, String key) {
         waitForVisibility(element);
         return element.getAttribute(key);
     }
-    public WebElement scrollToElement() {
+    public WebElement scrollToElement(String message) {
         if (getPlatform().equalsIgnoreCase("android")) {
             return getDriver().findElement(AppiumBy.androidUIAutomator(
                     "new UiScrollable(new UiSelector().scrollable(true)).scrollIntoView("
@@ -418,14 +442,18 @@ public class BaseTest {
             ));
             return getDriver().findElement(AppiumBy.accessibilityId("test-Price"));
         }
+        ExtentReport.getTest().log(Status.INFO, message);
         return null;
     }
-    public String getText(WebElement element) {
-        return switch (getPlatform().toLowerCase()) {
-            case "android" -> getAttribute(element, "text");
-            case "ios" -> getAttribute(element, "label");
-            default -> null;
-        };
+    public String getText(WebElement element, String message) {
+        String text = null;
+
+        switch (getPlatform().toLowerCase()) {
+            case "android": text = getAttribute(element, "text"); break;
+            case "ios": text = getAttribute(element, "text"); break;
+        }
+        ExtentReport.getTest().log(Status.INFO, message);
+        return text;
     }
     public void clearField(WebElement element) {
         waitForVisibility(element);

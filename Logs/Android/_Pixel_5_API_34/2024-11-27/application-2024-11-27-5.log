@@ -1,0 +1,10 @@
+[Logs/Android/_Pixel_5_API_34 INFO ] 2024-11-27 11:21:33.862 BaseTest:367 - All Android Emulators have been stopped.
+[Logs/Android/_Pixel_5_API_34 INFO ] 2024-11-27 11:21:39.117 BaseTest:190 - Appium server stopped
+[Logs/Android/_Pixel_5_API_34 INFO ] 2024-11-27 11:26:49.430 BaseTest:227 - log path: Logs/Android/_Pixel_5_API_34
+[Logs/Android/_Pixel_5_API_34 INFO ] 2024-11-27 11:27:09.286 BaseTest:415 - login is: invalid_username
+[Logs/Android/_Pixel_5_API_34 INFO ] 2024-11-27 11:27:10.938 BaseTest:415 - password is: secret_sauce
+[Logs/Android/_Pixel_5_API_34 INFO ] 2024-11-27 11:27:12.099 BaseTest:402 - Press login button
+[Logs/Android/_Pixel_5_API_34 INFO ] 2024-11-27 11:27:15.797 BaseTest:415 - login is: standard_user
+[Logs/Android/_Pixel_5_API_34 INFO ] 2024-11-27 11:27:17.437 BaseTest:415 - password is: invalid_password
+[Logs/Android/_Pixel_5_API_34 INFO ] 2024-11-27 11:27:18.613 BaseTest:402 - Press login button
+[Logs/Android/_Pixel_5_API_34 INFO ] 2024-11-27 11:27:21.338 BaseTest:415 - login is: standard_user

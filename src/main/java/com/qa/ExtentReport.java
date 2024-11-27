@@ -1,19 +1,23 @@
 package com.qa;
 
+import com.aventstack.extentreports.ExtentReports;
+import com.aventstack.extentreports.ExtentTest;
+import com.aventstack.extentreports.reporter.ExtentSparkReporter;
+import com.aventstack.extentreports.reporter.configuration.Theme;
+
 import java.util.HashMap;
 import java.util.Map;
 
 public class ExtentReport {
-
     static ExtentReports extent;
     final static String filePath = "Extent.html";
     static Map<Integer, ExtentTest> extentTestMap = new HashMap();
 
     public synchronized static ExtentReports getReporter() {
         if (extent == null) {
-            ExtentSparkReporter html = new ExtentSparkReporter("Extent.html");
-            html.config().setDocumentTitle("Appium Framework");
-            html.config().setReportName("MyApp");
+            ExtentSparkReporter html = new ExtentSparkReporter(filePath);
+            html.config().setDocumentTitle("Appium Framework Reports");
+            html.config().setReportName("SauceLabs SampleMobileApp");
             html.config().setTheme(Theme.DARK);
             extent = new ExtentReports();
             extent.attachReporter(html);
@@ -31,5 +35,6 @@ public class ExtentReport {
         extentTestMap.put((int) (long) (Thread.currentThread().getId()), test);
         return test;
     }
-
 }
+
+

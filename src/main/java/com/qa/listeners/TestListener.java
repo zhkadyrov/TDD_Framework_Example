@@ -1,9 +1,14 @@
 package com.qa.listeners;
 
+import com.aventstack.extentreports.MediaEntityBuilder;
+import com.aventstack.extentreports.Status;
 import com.qa.BaseTest;
+import com.qa.ExtentReport;
 import com.qa.utils.TestUtils;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 import org.openqa.selenium.OutputType;
+import org.testng.ITestContext;
 import org.testng.ITestListener;
 import org.testng.ITestResult;
 import org.testng.Reporter;
@@ -41,6 +46,15 @@ public class TestListener implements ITestListener {
         BaseTest baseTest = new BaseTest();
         File screenShot = baseTest.getDriver().getScreenshotAs(OutputType.FILE);
 
+        //=======================================================================================
+        byte[] encoded = null;
+        try {
+            encoded = Base64.encodeBase64(FileUtils.readFileToByteArray(screenShot));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        //=======================================================================================
+
         Map<String, String> params = new HashMap<>();
         params = result.getTestContext().getCurrentXmlTest().getAllParameters();
 
@@ -62,6 +76,41 @@ public class TestListener implements ITestListener {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        //=======================================================================================
+        ExtentReport.getTest().fail("Test Failed",
+                MediaEntityBuilder.createScreenCaptureFromPath(imagePath).build());
+
+        ExtentReport.getTest().fail("Test Failed",
+                MediaEntityBuilder.createScreenCaptureFromBase64String("base64String").build());
+
+        ExtentReport.getTest().fail(result.getThrowable());
+        //=======================================================================================
+
+
+    }
+
+    @Override
+    public void onTestStart(ITestResult result) {
+        BaseTest baseTest = new BaseTest();
+        ExtentReport.startTest(result.getName(), result.getMethod().getDescription())
+                .assignCategory(baseTest.getPlatform() + "_" + baseTest.getDeviceName())
+                .assignAuthor("Janbolot");
+    }
+
+    @Override
+    public void onTestSuccess(ITestResult result) {
+        ExtentReport.getTest().log(Status.PASS, "Test Passed");
+    }
+
+    @Override
+    public void onTestSkipped(ITestResult result) {
+        ExtentReport.getTest().log(Status.SKIP, "Test Skipped");
+    }
+
+    @Override
+    public void onFinish(ITestContext context) {
+        ExtentReport.getReporter().flush();
     }
 }
 

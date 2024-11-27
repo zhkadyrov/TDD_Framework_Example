@@ -1,5 +1,6 @@
 package com.qa.pages;
 
+import com.qa.MenuPage;
 import io.appium.java_client.pagefactory.AndroidFindBy;
 import io.appium.java_client.pagefactory.iOSXCUITFindBy;
 import org.openqa.selenium.WebElement;
@@ -28,42 +29,33 @@ public class ProductDetailsPage extends MenuPage {
 
     public String getSlbTitle() {
         waitForVisibility(slbTitle);
-        String title = getText(slbText);
-        testUtils.log().info("title is: " + title);
-        return getText(slbTitle);
+        return getText(slbText, "title is: ");
     }
 
     public String getSlbText() {
         waitForVisibility(slbText);
-        String text = getText(slbText);
-        testUtils.log().info("title is: " + text);
-        return getText(slbText);
+        return getText(slbText, "text is: ");
     }
 
     public String getSlbPrice() {
         waitForVisibility(slbPrice);
-        String text = getText(slbPrice);
-        testUtils.log().info("title is: " + text);
-        return getText(slbPrice);
+        return getText(slbPrice, "price is: ");
     }
 
     public ProductDetailsPage scrollToSlbPrice() {
-        scrollToElement();
+        scrollToElement("scrolling to SLB price");
         waitForVisibility(slbPrice);
-        testUtils.log().info("scrolling to SLB price");
         return this;
     }
 
     public boolean isAddToCartButtonIsDisplayed() {
         waitForVisibility(addToCartButton);
-        testUtils.log().info("add to card button is displayed");
         return addToCartButton.isDisplayed();
     }
 
     public ProductsPage pressBackButton() {
         waitForVisibility(backToProductsButton);
-        testUtils.log().info("press back to product button");
-        click(backToProductsButton);
+        click(backToProductsButton, "press back to product button");
         return new ProductsPage();
     }
 }
