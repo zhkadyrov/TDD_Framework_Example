@@ -27,6 +27,7 @@ import org.testng.ITestResult;
 import org.testng.annotations.*;
 
 import java.io.*;
+import java.net.MalformedURLException;
 import java.net.ServerSocket;
 import java.net.URL;
 import java.time.Duration;
@@ -38,9 +39,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static java.io.File.separator;
 
 public class BaseTest {
-    // Common resources shared across tests
+    // Thread-local переменные для параллельного выполнения
     private static final ThreadLocal<Integer> appiumPort = ThreadLocal.withInitial(() -> 4723);
     private static final AtomicInteger portCounter = new AtomicInteger(4723);
+    private static final AtomicInteger wdaPortCounter = new AtomicInteger(8100);
+    private static final AtomicInteger webKitProxyPortCounter = new AtomicInteger(27753);
+
+    // Common resources shared across tests
     protected static ThreadLocal <AppiumDriver> driver = new ThreadLocal<AppiumDriver>();
     protected static ThreadLocal <WebDriverWait> wait = new ThreadLocal<WebDriverWait>();
     protected static ThreadLocal <Properties> properties = new ThreadLocal<Properties>();
@@ -99,33 +104,289 @@ public class BaseTest {
     }
 
 //======================================================================================================================
-    @BeforeSuite
-    public void beforeSuite() {
-        ThreadContext.put("ROUTINGKEY", "ServerLogs");
-        server = getAppiumService(); // -> If using Mac, uncomment this statement and comment below statement
-        server.start();
-        server.clearOutPutStreams(); // -> Comment this if you want to see server logs in the console
-        testUtils.log().info("Appium server started");
 
-//        server = getAppiumServerDefault(); // -> If using Windows, uncomment this statement and comment above statement
-//        try {
-//            if(!checkIfAppiumServerIsRunnning(4723)) {
-//                server.start();
-//                server.clearOutPutStreams(); // -> Comment this if you want to see server logs in the console
-//                testUtils.log().info("Appium server started");
-//            } else {
-//                testUtils.log().info("Appium server already running");
-//            }
-//        } catch (Exception e) {
-//            throw new RuntimeException(e);
-//        }
+    @BeforeSuite
+    @Parameters({"parallel"})
+    public void beforeSuite(@Optional("false") String parallel) {
+        int port = parallel.equalsIgnoreCase("true") ? portCounter.getAndIncrement() : 4723; // Выбор порта
+        appiumPort.set(port);
+
+        ensurePortIsFree(port); // Проверяем и освобождаем порт перед запуском
+
+        ThreadContext.put("ROUTINGKEY", "ServerLogs");
+        server = getAppiumService(port); // Запуск Appium-сервера на выбранном порту
+        server.start();
+        server.clearOutPutStreams();
+        testUtils.log().info("Appium server started on port: " + port);
     }
+
 
     @AfterSuite
     public void afterSuite() {
-        if(server.isRunning()){
+        if (server != null && server.isRunning()) {
             server.stop();
-            testUtils.log().info("Appium server stopped");
+            testUtils.log().info("Appium server stopped on port: " + appiumPort.get());
+        }
+        ensurePortIsFree(appiumPort.get()); // Освобождаем порт после остановки
+    }
+
+// =====================================================================================================================
+
+    @BeforeTest
+    @Parameters({"realDevice", "parallel" , "platformName", "platformVersion", "deviceName"})
+//    @Optional("onlyAndroid") String systemPort, @Optional("onlyAndroid") String chromeDriverPort
+//    @Optional("iOSOnly") String wdaLocalPort, @Optional("iOSOnly") String webKitDebugProxyPort
+    public void beforeTest(String realDevice, String parallel, String platformName, String platformVersion, String deviceName) throws Exception {
+        int port = parallel.equalsIgnoreCase("true") ? appiumPort.get() : 4723; // Использование порта в зависимости от режима
+        setDateTime(testUtils.dateTime());
+        setPlatform(platformName);
+        setDeviceName(deviceName);
+
+        loadProperties("config.properties");
+        loadStrings("strings/strings.xml");
+
+        setDriver(initializeDriver(realDevice, platformName, platformVersion, deviceName, port));
+        getDriver().manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
+        setWait(new WebDriverWait(getDriver(), Duration.ofSeconds(TestUtils.WAIT)));
+    }
+
+    @AfterTest
+    public void afterTest() {
+        if (driver != null) {
+            getDriver().quit();
+        }
+
+        // Остановка симуляторов и эмуляторов
+        if (getPlatform().equalsIgnoreCase("ios")){
+            stopIOSSimulator();
+        } else if (getPlatform().equalsIgnoreCase("android")) {
+            stopAndroidEmulator();
+        }
+    }
+
+    public boolean checkIfAppiumServerIsRunnning() throws Exception {
+        int port = appiumPort.get();
+        try (ServerSocket socket = new ServerSocket(port)) {
+            return false; // Порт свободен
+        } catch (IOException e) {
+            return true; // Порт занят
+        }
+
+    }
+
+    public AppiumDriverLocalService getAppiumServerDefault() {
+        return AppiumDriverLocalService.buildDefaultService();
+    }
+
+    private AppiumDriverLocalService getAppiumService(int port) {
+        ensurePortIsFree(port); // Проверяем и освобождаем порт перед запуском сервера
+        return AppiumDriverLocalService.buildService(new AppiumServiceBuilder()
+                .usingDriverExecutable(new File("/opt/homebrew/opt/node@18/bin/node"))
+                .withAppiumJS(new File("/opt/homebrew/lib/node_modules/appium/build/lib/main.js"))
+                .usingPort(port) // Уникальный или дефолтный порт
+                .withArgument(GeneralServerFlag.SESSION_OVERRIDE)
+                .withLogFile(new File("ServerLogs/server-" + port + ".log")));
+    }
+
+    private void releasePort(int port) {
+        try {
+            String command = String.format("lsof -i tcp:%d | grep LISTEN | awk '{print $2}'", port);
+            Process process = Runtime.getRuntime().exec(new String[]{"/bin/bash", "-c", command});
+
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                String pid = reader.readLine();
+                if (pid != null && !pid.isEmpty()) {
+                    String killCommand = "kill -9 " + pid;
+                    Runtime.getRuntime().exec(killCommand);
+                    log.info("Port " + port + " successfully released.");
+                } else {
+                    log.info("No process found on port " + port + ". Port is already free.");
+                }
+            }
+        } catch (Exception e) {
+            log.error("Failed to release port " + port, e);
+        }
+    }
+
+// =====================================================================================================================
+
+    // Driver initialization
+    private synchronized AppiumDriver initializeDriver(String realDevice, String platformName, String platformVersion,
+                                                       String deviceName, int appiumPort) throws Exception {
+        int currentWdaPort = wdaPortCounter.getAndIncrement();
+        int currentWebKitPort = webKitProxyPortCounter.getAndIncrement();
+
+        URL appiumServerUrl = getAppiumServerUrl(appiumPort);
+        URL appLocationPath = getAppLocationPath(platformName);
+
+        switch (platformName.toLowerCase()) {
+            case "android":
+                UiAutomator2Options androidOptions = createAndroidOptions(
+                        realDevice, platformName, platformVersion, deviceName, appLocationPath, appiumPort);
+                return new AndroidDriver(appiumServerUrl, androidOptions);
+
+            case "ios":
+                XCUITestOptions iosOptions = createIOSOptions(
+                        realDevice, platformName, platformVersion, deviceName, appLocationPath, currentWdaPort, currentWebKitPort);
+                return new IOSDriver(appiumServerUrl, iosOptions);
+
+            default:
+                throw new IllegalArgumentException("Unknown platform: " + platformName);
+        }
+    }
+
+    //======================================================================================================================
+
+    private void ensurePortIsFree(int port) {
+        if (isPortInUse(port)) {
+            releasePort(port);
+        }
+    }
+
+    private boolean isPortInUse(int port) {
+        try (ServerSocket socket = new ServerSocket(port)) {
+            return false; // Порт свободен
+        } catch (IOException e) {
+            return true; // Порт занят
+        }
+    }
+
+    private URL getAppiumServerUrl(int port) throws MalformedURLException {
+        return new URL("http://0.0.0.0:" + port + "/");
+    }
+
+    private URL getAppLocationPath(String platformName) {
+        String appLocationKey = platformName.equalsIgnoreCase("android")
+                ? "androidAppLocation"
+                : "iosAppLocation";
+        URL appLocationPath = getClass().getClassLoader().getResource(getProperty().getProperty(appLocationKey));
+
+        if (appLocationPath == null) {
+            throw new IllegalArgumentException("App location not found for platform: " + platformName);
+        }
+
+        return appLocationPath;
+    }
+
+    private UiAutomator2Options createAndroidOptions(String realDevice, String platformName, String platformVersion,
+                                                     String deviceName, URL appLocationPath, int appiumPort) {
+        UiAutomator2Options options = new UiAutomator2Options();
+        setCommonCapabilities(options, platformName, platformVersion, deviceName);
+
+        if (realDevice.equalsIgnoreCase("true")) {
+            options.setCapability("appium:systemPort", appiumPort + 100);
+            options.setCapability("appium:chromeDriverPort", appiumPort + 200);
+        }
+
+//        options.setCapability("appium:app", appLocationPath.getPath());
+        options.setCapability("appium:avd", deviceName);
+        options.setCapability("appium:avdLaunchTimeout", 120_000);
+        options.setCapability("appium:newCommandTimeout", 120);
+        options.setCapability("appium:appPackage", getProperty().getProperty("androidAppPackage"));
+        options.setCapability("appium:appActivity", getProperty().getProperty("androidAppActivity"));
+
+        return options;
+    }
+
+    private XCUITestOptions createIOSOptions(String realDevice, String platformName, String platformVersion,
+                                             String deviceName, URL appLocationPath, int wdaPort, int webKitPort) {
+        XCUITestOptions options = new XCUITestOptions();
+        setCommonCapabilities(options, platformName, platformVersion, deviceName);
+
+        if (realDevice.equalsIgnoreCase("true")) {
+            options.setCapability("wdaLocalPort", wdaPort);
+            options.setCapability("webKitDebugProxyPort", webKitPort);
+        }
+
+//        options.setCapability("appium:app", appLocationPath.getPath());
+        options.setCapability("appium:bundleId", getProperty().getProperty("iosBundleId"));
+        options.setCapability("appium:simulatorStartupTimeout", 120_000);
+        options.setCapability("appium:newCommandTimeout", 120);
+
+        return options;
+    }
+    private void setCommonCapabilities(MutableCapabilities options, String platformName, String platformVersion, String deviceName) {
+        if (platformName.equalsIgnoreCase("android")) {
+            options.setCapability("appium:automationName", getProperty().getProperty("androidAutomationName"));
+        } else if (platformName.equalsIgnoreCase("ios")) {
+            options.setCapability("appium:automationName", getProperty().getProperty("iosAutomationName"));
+        }
+
+        options.setCapability("appium:automationName", getProperty().getProperty(platformName.toLowerCase() + "AutomationName"));
+        options.setCapability("appium:platformName", platformName);
+        options.setCapability("appium:platformVersion", platformVersion);
+        options.setCapability("appium:deviceName", deviceName);
+    }
+
+    private void loadProperties(String fileName) throws IOException {
+        Properties props = new Properties();
+        try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(fileName)) {
+            if (inputStream == null) {
+                throw new FileNotFoundException("Property file '" + fileName + "' not found in the classpath");
+            }
+            props.load(inputStream);
+            setProperties(props); // Устанавливаем свойства в thread-local переменную
+            log.info("Loaded properties from: " + fileName);
+        }
+    }
+
+    private void loadStrings(String filePath) throws IOException {
+        try (InputStream stringsInputStream = getClass().getClassLoader().getResourceAsStream(filePath)) {
+            if (stringsInputStream == null) {
+                throw new FileNotFoundException("Strings file '" + filePath + "' not found in the classpath");
+            }
+            HashMap<String, String> parsedStrings = null;
+            try {
+                parsedStrings = testUtils.parseStringXML(stringsInputStream);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            setStrings(parsedStrings); // Устанавливаем строки в thread-local переменную
+            log.info("Loaded strings from: " + filePath);
+        }
+    }
+
+//======================================================================================================================
+
+    // Device management
+    public static void stopIOSSimulator() {
+        try {
+            String command = "xcrun simctl shutdown all";
+            Process process = new ProcessBuilder("/bin/bash", "-c", command).start();
+            int exitCode = process.waitFor();
+            if (exitCode == 0) {
+                log.info("All iOS Simulators have been stopped.");
+            } else {
+                log.error("Failed to stop iOS Simulators. Exit code: " + exitCode);
+            }
+        } catch (Exception e) {
+            log.error("Error while stopping iOS Simulators: ", e);
+        }
+    }
+    public static void stopAndroidEmulator() {
+        try {
+            String command = "adb emu kill";
+            Process process = new ProcessBuilder("/bin/bash", "-c", command).start();
+            int exitCode = process.waitFor();
+            if (exitCode == 0) {
+                log.info("All Android Emulators have been stopped.");
+            } else {
+                log.error("Failed to stop Android Emulators. Exit code: " + exitCode);
+            }
+        } catch (Exception e) {
+            log.error("Error while stopping Android Emulators: ", e);
+        }
+    }
+    public void closeApp() {
+        switch (getPlatform().toLowerCase()) {
+            case "android": ((InteractsWithApps) getDriver()).terminateApp(getProperty().getProperty("androidAppPackage")); break;
+            case "ios": ((InteractsWithApps) getDriver()).terminateApp(getProperty().getProperty("iosBundleId")); break;
+        }
+    }
+    public void launchApp() {
+        switch (getPlatform().toLowerCase()) {
+            case "android": ((InteractsWithApps) getDriver()).activateApp(getProperty().getProperty("androidAppPackage")); break;
+            case "ios": ((InteractsWithApps) getDriver()).activateApp(getProperty().getProperty("iosBundleId")); break;
         }
     }
 
@@ -173,224 +434,6 @@ public class BaseTest {
                 // Обрабатываем возможные ошибки при записи файла
                 e.printStackTrace();
             }
-        }
-    }
-
-
-    public boolean checkIfAppiumServerIsRunnning(int port) throws Exception {
-        boolean isAppiumServerRunning = false;
-        ServerSocket socket;
-        try {
-            socket = new ServerSocket(port);
-            socket.close();
-        } catch (IOException e) {
-            System.out.println("1");
-            isAppiumServerRunning = true;
-        } finally {
-            socket = null;
-        }
-        return isAppiumServerRunning;
-    }
-
-    public AppiumDriverLocalService getAppiumServerDefault() {
-        return AppiumDriverLocalService.buildDefaultService();
-    }
-
-    public AppiumDriverLocalService getAppiumService() {
-//        Map<String, String> environment = new HashMap<>(); // Optional
-//        environment.put("PATH", "Содержимое PATH в системе" + System.getenv("PATH")); // echo $PATH
-
-
-        return AppiumDriverLocalService.buildService(new AppiumServiceBuilder()
-                .usingDriverExecutable(new File("/opt/homebrew/opt/node@18/bin/node"))
-                .withAppiumJS(new File("/opt/homebrew/lib/node_modules/appium/build/lib/main.js"))
-                .usingPort(4723)
-                .withArgument(GeneralServerFlag.SESSION_OVERRIDE)
-                        .withLogFile(new File("ServerLogs/server.log")) // Записывает логи сервера в файл server.log
-//                .withEnvironment(environment) // Optional
-        );
-    }
-
-// =====================================================================================================================
-
-    @BeforeTest
-    @Parameters({"realDevice", "parallel" , "platformName", "platformVersion", "deviceName"})
-//    @Optional("onlyAndroid") String systemPort, @Optional("onlyAndroid") String chromeDriverPort
-//    @Optional("iOSOnly") String wdaLocalPort, @Optional("iOSOnly") String webKitDebugProxyPort
-    public void beforeTest(String realDevice, String parallel, String platformName, String platformVersion, String deviceName) throws Exception {
-        setDateTime(testUtils.dateTime());
-        setPlatform(platformName);
-        setDeviceName(deviceName);
-        InputStream inputStream = null;
-        InputStream stringsInputStream = null;
-        Properties props;
-
-        String strFile = "Logs" + separator + platformName + separator + "_" + deviceName;
-        File logFile = new File(strFile);
-        if (!logFile.exists()) {
-            logFile.mkdirs();
-        }
-        ThreadContext.put("ROUTINGKEY", strFile);
-        testUtils.log().info("log path: " + strFile);
-
-        try {
-            props = new Properties();
-            inputStream = getClass().getClassLoader().getResourceAsStream("config.properties");
-            props.load(inputStream);
-            setProperties(props);
-
-            stringsInputStream = getClass().getClassLoader().getResourceAsStream("strings/strings.xml");
-
-            HashMap<String, String> parsedStrings = testUtils.parseStringXML(stringsInputStream);
-            setStrings(parsedStrings);
-
-            setDriver(initializeDriver(realDevice, parallel, platformName, platformVersion, deviceName));
-
-            getDriver().manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
-            setWait(new WebDriverWait(getDriver(), Duration.ofSeconds(TestUtils.WAIT)));
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw e;
-        } finally {
-            if (inputStream != null) { inputStream.close(); }
-            if (stringsInputStream != null) { stringsInputStream.close(); }
-        }
-    }
-
-    @AfterTest
-    public void afterTest() {
-        if (driver != null) {
-            getDriver().quit();
-        }
-
-        // Остановка симуляторов и эмуляторов
-        if (getPlatform().equalsIgnoreCase("ios")){
-            stopIOSSimulator();
-        } else if (getPlatform().equalsIgnoreCase("android")) {
-            stopAndroidEmulator();
-        }
-    }
-
-//======================================================================================================================
-
-    // Driver initialization
-    private synchronized AppiumDriver initializeDriver(String realDevice, String parallel, String platformName,
-                                                       String platformVersion, String deviceName) throws Exception {
-        URL appiumServerUrl = null;
-        URL appLocationPath = null;
-
-        if (parallel.equalsIgnoreCase("true")) {
-            if (platformName.equalsIgnoreCase("android")) {
-                appiumServerUrl = new URL(getProperty().getProperty("appiumURLFirst"));
-                appLocationPath = getClass().getClassLoader().getResource(getProperty().getProperty("androidAppLocation"));
-            } else if (platformName.equalsIgnoreCase("ios")) {
-                appiumServerUrl = new URL(getProperty().getProperty("appiumURLSecond"));
-                appLocationPath = getClass().getClassLoader().getResource(getProperty().getProperty("iosAppLocation"));
-            }
-        } else {
-            appiumServerUrl = new URL(getProperty().getProperty("appiumURLFirst"));
-            appLocationPath = getClass().getClassLoader().getResource(
-                    platformName.equalsIgnoreCase("android")
-                            ? getProperty().getProperty("androidAppLocation")
-                            : getProperty().getProperty("iosAppLocation")
-            );
-        }
-
-        switch (platformName.toLowerCase()) {
-            case "android":
-                UiAutomator2Options androidOptions = new UiAutomator2Options();
-                setCommonCapabilities(androidOptions, platformName, platformVersion, deviceName);
-
-                if (realDevice.equalsIgnoreCase("true")) {
-                    androidOptions.setCapability("appium:systemPort", "10000");
-                    androidOptions.setCapability("appium:chromeDriverPort", "11000");
-                }
-
-//                androidOptions.setCapability("appium:app", appLocationPath);
-                androidOptions.setCapability("appium:avd", deviceName); // Pixel_5_API_34
-                androidOptions.setCapability("appium:avdLaunchTimeout", 120_000);
-                androidOptions.setCapability("appium:newCommandTimeout", 120);
-                androidOptions.setCapability("appium:appPackage", getProperty()
-                        .getProperty("androidAppPackage"));
-                androidOptions.setCapability("appium:appActivity", getProperty()
-                        .getProperty("androidAppActivity"));
-                return new AndroidDriver(appiumServerUrl, androidOptions);
-
-            case "ios":
-                XCUITestOptions iosOptions = new XCUITestOptions();
-                setCommonCapabilities(iosOptions, platformName, platformVersion, deviceName);
-                iosOptions.setCapability("appium:bundleId", getProperty().getProperty("iosBundleId"));
-
-                if (realDevice.equalsIgnoreCase("true")) {
-                    iosOptions.setCapability("wdaLocalPort", "10001");
-                    iosOptions.setCapability("webKitDebugProxyPort", "11001");
-                }
-
-                iosOptions.setCapability("appium:app", appLocationPath);
-                iosOptions.setCapability("appium:simulatorStartupTimeout", 120_000);
-                iosOptions.setCapability("appium:newCommandTimeout", 120);
-
-                return new IOSDriver(appiumServerUrl, iosOptions);
-
-            default:
-                throw new IllegalArgumentException("Unknown platform: " + platformName);
-        }
-    }
-    private void setCommonCapabilities(MutableCapabilities options, String platformName, String platformVersion, String deviceName) {
-        if (platformName.equalsIgnoreCase("android")) {
-            options.setCapability("appium:automationName", getProperty().getProperty("androidAutomationName"));
-        } else if (platformName.equalsIgnoreCase("ios")) {
-            options.setCapability("appium:automationName", getProperty().getProperty("iosAutomationName"));
-        }
-
-        options.setCapability("appium:automationName", getProperty().getProperty(platformName.toLowerCase() + "AutomationName"));
-        options.setCapability("appium:platformName", platformName);
-        options.setCapability("appium:platformVersion", platformVersion);
-        options.setCapability("appium:deviceName", deviceName);
-    }
-
-//======================================================================================================================
-
-    // Device management
-    public static void stopIOSSimulator() {
-        try {
-            String command = "xcrun simctl shutdown all";
-            Process process = new ProcessBuilder("/bin/bash", "-c", command).start();
-            int exitCode = process.waitFor();
-            if (exitCode == 0) {
-                log.info("All iOS Simulators have been stopped.");
-            } else {
-                log.error("Failed to stop iOS Simulators. Exit code: " + exitCode);
-            }
-        } catch (Exception e) {
-            log.error("Error while stopping iOS Simulators: ", e);
-        }
-    }
-    public static void stopAndroidEmulator() {
-        try {
-            String command = "adb emu kill";
-            Process process = new ProcessBuilder("/bin/bash", "-c", command).start();
-            int exitCode = process.waitFor();
-            if (exitCode == 0) {
-                log.info("All Android Emulators have been stopped.");
-            } else {
-                log.error("Failed to stop Android Emulators. Exit code: " + exitCode);
-            }
-        } catch (Exception e) {
-            log.error("Error while stopping Android Emulators: ", e);
-        }
-    }
-    public void closeApp() {
-        switch (getPlatform().toLowerCase()) {
-            case "android": ((InteractsWithApps) getDriver()).terminateApp(getProperty().getProperty("androidAppPackage")); break;
-            case "ios": ((InteractsWithApps) getDriver()).terminateApp(getProperty().getProperty("iosBundleId")); break;
-        }
-    }
-    public void launchApp() {
-        switch (getPlatform().toLowerCase()) {
-            case "android": ((InteractsWithApps) getDriver()).activateApp(getProperty().getProperty("androidAppPackage")); break;
-            case "ios": ((InteractsWithApps) getDriver()).activateApp(getProperty().getProperty("iosBundleId")); break;
         }
     }
 
@@ -450,7 +493,7 @@ public class BaseTest {
 
         switch (getPlatform().toLowerCase()) {
             case "android": text = getAttribute(element, "text"); break;
-            case "ios": text = getAttribute(element, "text"); break;
+            case "ios": text = getAttribute(element, "label"); break;
         }
         ExtentReport.getTest().log(Status.INFO, message);
         return text;

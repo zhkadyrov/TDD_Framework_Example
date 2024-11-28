@@ -1,0 +1,12 @@
+[ServerLogs INFO ] 2024-11-27 17:19:28.810 BaseTest:376 - All iOS Simulators have been stopped.
+[ServerLogs INFO ] 2024-11-27 17:19:29.122 BaseTest:213 - No process found on port 4724. Port is already free.
+[ServerLogs INFO ] 2024-11-27 17:20:34.951 BaseTest:116 - Appium server started on port: 4723
+[ServerLogs INFO ] 2024-11-27 17:20:58.487 BaseTest:435 - login is: invalid_username
+[ServerLogs INFO ] 2024-11-27 17:21:00.117 BaseTest:435 - password is: secret_sauce
+[ServerLogs INFO ] 2024-11-27 17:21:01.816 BaseTest:425 - Press login button
+[ServerLogs INFO ] 2024-11-27 17:21:05.504 BaseTest:435 - login is: standard_user
+[ServerLogs INFO ] 2024-11-27 17:21:07.183 BaseTest:435 - password is: invalid_password
+[ServerLogs INFO ] 2024-11-27 17:21:08.357 BaseTest:425 - Press login button
+[ServerLogs INFO ] 2024-11-27 17:21:10.814 BaseTest:435 - login is: standard_user
+[ServerLogs INFO ] 2024-11-27 17:21:12.479 BaseTest:435 - password is: secret_sauce
+[ServerLogs INFO ] 2024-11-27 17:21:13.148 BaseTest:425 - Press login button

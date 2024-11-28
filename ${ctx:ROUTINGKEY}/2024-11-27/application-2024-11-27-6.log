@@ -1,0 +1,12 @@
+[${ctx:ROUTINGKEY} INFO ] 2024-11-27 18:00:02.793 BaseTest:464 - login is: invalid_username
+[${ctx:ROUTINGKEY} INFO ] 2024-11-27 18:00:04.264 BaseTest:464 - password is: secret_sauce
+[${ctx:ROUTINGKEY} INFO ] 2024-11-27 18:00:05.735 BaseTest:454 - Press login button
+[${ctx:ROUTINGKEY} INFO ] 2024-11-27 18:00:18.506 BaseTest:464 - login is: standard_user
+[${ctx:ROUTINGKEY} INFO ] 2024-11-27 18:00:20.821 BaseTest:464 - password is: invalid_password
+[${ctx:ROUTINGKEY} INFO ] 2024-11-27 18:00:22.846 BaseTest:454 - Press login button
+[${ctx:ROUTINGKEY} INFO ] 2024-11-27 18:00:23.546 BaseTest:464 - login is: invalid_username
+[${ctx:ROUTINGKEY} INFO ] 2024-11-27 18:00:28.416 BaseTest:464 - password is: secret_sauce
+[${ctx:ROUTINGKEY} INFO ] 2024-11-27 18:00:30.499 BaseTest:464 - login is: standard_user
+[${ctx:ROUTINGKEY} INFO ] 2024-11-27 18:00:31.322 BaseTest:454 - Press login button
+[${ctx:ROUTINGKEY} INFO ] 2024-11-27 18:00:32.553 BaseTest:464 - password is: secret_sauce
+[${ctx:ROUTINGKEY} INFO ] 2024-11-27 18:00:33.952 BaseTest:454 - Press login button

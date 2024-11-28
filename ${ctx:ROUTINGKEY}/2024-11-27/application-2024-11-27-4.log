@@ -1,0 +1,11 @@
+[${ctx:ROUTINGKEY} INFO ] 2024-11-27 17:56:53.675 BaseTest:454 - Press login button
+[${ctx:ROUTINGKEY} INFO ] 2024-11-27 17:56:57.416 BaseTest:464 - login is: standard_user
+[${ctx:ROUTINGKEY} INFO ] 2024-11-27 17:56:59.038 BaseTest:464 - password is: invalid_password
+[${ctx:ROUTINGKEY} INFO ] 2024-11-27 17:57:00.214 BaseTest:454 - Press login button
+[${ctx:ROUTINGKEY} INFO ] 2024-11-27 17:57:02.634 BaseTest:464 - login is: standard_user
+[${ctx:ROUTINGKEY} INFO ] 2024-11-27 17:57:04.627 BaseTest:464 - password is: secret_sauce
+[${ctx:ROUTINGKEY} INFO ] 2024-11-27 17:57:05.773 BaseTest:454 - Press login button
+[${ctx:ROUTINGKEY} INFO ] 2024-11-27 17:57:08.535 BaseTest:372 - All Android Emulators have been stopped.
+[${ctx:ROUTINGKEY} INFO ] 2024-11-27 17:57:29.774 BaseTest:329 - Loaded properties from: config.properties
+[${ctx:ROUTINGKEY} INFO ] 2024-11-27 17:57:29.787 BaseTest:345 - Loaded strings from: strings/strings.xml
+[${ctx:ROUTINGKEY} INFO ] 2024-11-27 17:58:21.777 BaseTest:464 - login is: invalid_username

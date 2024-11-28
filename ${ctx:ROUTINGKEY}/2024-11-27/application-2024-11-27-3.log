@@ -1,0 +1,12 @@
+[${ctx:ROUTINGKEY} INFO ] 2024-11-27 17:36:12.543 BaseTest:425 - Press login button
+[${ctx:ROUTINGKEY} INFO ] 2024-11-27 17:36:25.061 BaseTest:435 - login is: standard_user
+[${ctx:ROUTINGKEY} INFO ] 2024-11-27 17:36:29.417 BaseTest:435 - password is: invalid_password
+[${ctx:ROUTINGKEY} INFO ] 2024-11-27 17:36:32.470 BaseTest:425 - Press login button
+[${ctx:ROUTINGKEY} INFO ] 2024-11-27 17:36:44.645 BaseTest:435 - login is: standard_user
+[${ctx:ROUTINGKEY} INFO ] 2024-11-27 17:36:49.193 BaseTest:435 - password is: secret_sauce
+[${ctx:ROUTINGKEY} INFO ] 2024-11-27 17:36:52.005 BaseTest:425 - Press login button
+[${ctx:ROUTINGKEY} INFO ] 2024-11-27 17:37:06.149 BaseTest:376 - All iOS Simulators have been stopped.
+[${ctx:ROUTINGKEY} INFO ] 2024-11-27 17:56:24.113 BaseTest:329 - Loaded properties from: config.properties
+[${ctx:ROUTINGKEY} INFO ] 2024-11-27 17:56:24.124 BaseTest:345 - Loaded strings from: strings/strings.xml
+[${ctx:ROUTINGKEY} INFO ] 2024-11-27 17:56:50.803 BaseTest:464 - login is: invalid_username
+[${ctx:ROUTINGKEY} INFO ] 2024-11-27 17:56:52.479 BaseTest:464 - password is: secret_sauce

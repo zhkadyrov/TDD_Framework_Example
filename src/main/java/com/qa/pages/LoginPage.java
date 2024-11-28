@@ -19,7 +19,7 @@ public class LoginPage extends BaseTest {
     @iOSXCUITFindBy(id = "test-LOGIN")
     private WebElement loginButton;
     @AndroidFindBy(xpath = "//*[contains(@text, \"Username and password do not match\")]")
-    @iOSXCUITFindBy(accessibility = "test-Error message")
+    @iOSXCUITFindBy(accessibility = "test-Error message") // Username and password do not match any user in this service.
     private WebElement errorMessage;
 
     public LoginPage() {
