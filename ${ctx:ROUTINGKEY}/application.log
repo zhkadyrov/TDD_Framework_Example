@@ -1,8 +1,0 @@
-[${ctx:ROUTINGKEY} INFO ] 2024-11-27 18:00:39.428 BaseTest:372 - All Android Emulators have been stopped.
-[${ctx:ROUTINGKEY} INFO ] 2024-11-27 18:00:42.579 BaseTest:464 - login is: standard_user
-[${ctx:ROUTINGKEY} INFO ] 2024-11-27 18:00:46.442 BaseTest:464 - password is: invalid_password
-[${ctx:ROUTINGKEY} INFO ] 2024-11-27 18:00:49.230 BaseTest:454 - Press login button
-[${ctx:ROUTINGKEY} INFO ] 2024-11-27 18:00:59.058 BaseTest:464 - login is: standard_user
-[${ctx:ROUTINGKEY} INFO ] 2024-11-27 18:01:02.454 BaseTest:464 - password is: secret_sauce
-[${ctx:ROUTINGKEY} INFO ] 2024-11-27 18:01:04.733 BaseTest:454 - Press login button
-[${ctx:ROUTINGKEY} INFO ] 2024-11-27 18:01:15.717 BaseTest:358 - All iOS Simulators have been stopped.

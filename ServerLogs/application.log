@@ -1,8 +1,0 @@
-[ServerLogs INFO ] 2024-11-27 17:35:02.592 BaseTest:116 - Appium server started on port: 4723
-[ServerLogs INFO ] 2024-11-27 17:37:06.317 BaseTest:213 - No process found on port 4724. Port is already free.
-[ServerLogs INFO ] 2024-11-27 17:56:24.088 BaseTest:120 - Appium server started on port: 4723
-[ServerLogs INFO ] 2024-11-27 17:57:13.799 BaseTest:128 - Appium server stopped on port: 4723
-[ServerLogs INFO ] 2024-11-27 17:57:29.750 BaseTest:120 - Appium server started on port: 4723
-[ServerLogs INFO ] 2024-11-27 17:59:07.360 BaseTest:128 - Appium server stopped on port: 4723
-[ServerLogs INFO ] 2024-11-27 17:59:17.476 BaseTest:120 - Appium server started on port: 4723
-[ServerLogs INFO ] 2024-11-27 18:01:20.795 BaseTest:128 - Appium server stopped on port: 4723

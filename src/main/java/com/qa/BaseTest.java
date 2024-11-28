@@ -174,11 +174,11 @@ public class BaseTest {
 
     }
 
-    public AppiumDriverLocalService getAppiumServerDefault() {
+    public AppiumDriverLocalService getAppiumServerDefault() { // Для Windows работает по умолчанию
         return AppiumDriverLocalService.buildDefaultService();
     }
 
-    private AppiumDriverLocalService getAppiumService(int port) {
+    private AppiumDriverLocalService getAppiumService(int port) { // Для Mac лучше использовать это
         ensurePortIsFree(port); // Проверяем и освобождаем порт перед запуском сервера
         return AppiumDriverLocalService.buildService(new AppiumServiceBuilder()
                 .usingDriverExecutable(new File("/opt/homebrew/opt/node@18/bin/node"))

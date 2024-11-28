@@ -14,17 +14,46 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
+    <profiles>
+        <!-- Профиль для Android : mvn clean test -Pandroid -->
+        <profile>
+            <id>android</id>
+            <properties>
+                <suiteXmlFile>android.xml</suiteXmlFile>
+            </properties>
+        </profile>
+
+        <!-- Профиль для iOS : mvn clean test -Pios -->
+        <profile>
+            <id>ios</id>
+            <properties>
+                <suiteXmlFile>ios.xml</suiteXmlFile>
+            </properties>
+        </profile>
+        <!-- Профиль для двух платформ : mvn clean test -Pall-tests  -->
+        <profile>
+            <id>all-tests</id>
+            <properties>
+                <suiteXmlFile>android.xml,ios.xml</suiteXmlFile>
+            </properties>
+        </profile>
+    </profiles>
+
     <build>
         <pluginManagement>
             <plugins>
                 <plugin>
                     <!-- Плагин для запуска тестов TestNG -->
+                    <!-- mvn clean test -Dsurefire.suiteXmlFiles=ios.xml,android.xml запускает перечисленные suites -->
+                    <!-- mvn clean test запускает вообще всё указанное в этом плагине-->
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>3.5.1</version>
                     <configuration>
                         <suiteXmlFiles>
-                            <suiteXmlFile>testng.xml</suiteXmlFile> <!-- путь к testng.xml -->
+                        <!-- <suiteXmlFile>${suiteXmlFile}</suiteXmlFile>-->
+                            <suiteXmlFile>android.xml</suiteXmlFile>
+                            <suiteXmlFile>ios.xml</suiteXmlFile>
                         </suiteXmlFiles>
                     </configuration>
                 </plugin>
@@ -103,6 +132,13 @@
             <groupId>com.aventstack</groupId>
             <artifactId>extentreports</artifactId>
             <version>5.0.9</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.34</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 
