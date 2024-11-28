@@ -1,4 +1,4 @@
-package com.qa;
+package com.qa.utils;
 
 import com.aventstack.extentreports.ExtentReports;
 import com.aventstack.extentreports.ExtentTest;
@@ -15,14 +15,14 @@ public class ExtentReport {
 
     public synchronized static ExtentReports getReporter() {
         if (extent == null) {
-            ExtentSparkReporter html = new ExtentSparkReporter(filePath);
+            ExtentSparkReporter html = new ExtentSparkReporter("Extent.html");
             html.config().setDocumentTitle("Appium Framework Reports");
             html.config().setReportName("SauceLabs SampleMobileApp");
             html.config().setTheme(Theme.DARK);
+
             extent = new ExtentReports();
             extent.attachReporter(html);
         }
-
         return extent;
     }
 

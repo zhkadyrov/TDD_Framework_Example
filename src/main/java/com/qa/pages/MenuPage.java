@@ -1,4 +1,4 @@
-package com.qa;
+package com.qa.pages;
 
 import com.qa.BaseTest;
 import com.qa.pages.SettingsPage;

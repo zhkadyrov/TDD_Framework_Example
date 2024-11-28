@@ -1,6 +1,5 @@
 package com.qa.pages;
 
-import com.qa.MenuPage;
 import io.appium.java_client.pagefactory.AndroidFindBy;
 import io.appium.java_client.pagefactory.iOSXCUITFindBy;
 import org.openqa.selenium.WebElement;
@@ -29,7 +28,7 @@ public class ProductDetailsPage extends MenuPage {
 
     public String getSlbTitle() {
         waitForVisibility(slbTitle);
-        return getText(slbText, "title is: ");
+        return getText(slbTitle, "title is: ");
     }
 
     public String getSlbText() {

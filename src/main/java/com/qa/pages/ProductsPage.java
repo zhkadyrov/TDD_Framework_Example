@@ -1,6 +1,5 @@
 package com.qa.pages;
 
-import com.qa.MenuPage;
 import io.appium.java_client.pagefactory.AndroidFindBy;
 import io.appium.java_client.pagefactory.AppiumFieldDecorator;
 import io.appium.java_client.pagefactory.iOSXCUITFindBy;

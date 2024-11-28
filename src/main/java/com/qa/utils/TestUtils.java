@@ -24,8 +24,8 @@ import static java.io.File.separator;
  * где ключами являются атрибуты name, а значениями — содержимое соответствующих тегов <string>.
  */
 public class TestUtils {
-    // Константа для ожидания (может использоваться в тестах)
     public static final long WAIT = 10;
+
 
     /**
      * Метод для парсинга XML-файла и преобразования его содержимого в HashMap.

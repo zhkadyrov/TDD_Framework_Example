@@ -1,19 +1,5 @@
 package com.qa.ui;
 
-import com.qa.DriverManager;
-import io.appium.java_client.AppiumBy;
-import io.appium.java_client.AppiumDriver;
-import io.appium.java_client.InteractsWithApps;
-import org.openqa.selenium.By;
-import org.openqa.selenium.Capabilities;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
-
-import java.time.Duration;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-
 // Класс для работы с глубокими ссылками в мобильных приложениях
 public class DeepLink {
 

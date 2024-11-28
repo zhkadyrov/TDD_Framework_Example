@@ -28,13 +28,13 @@ public class LoginPage extends BaseTest {
 
 
     public LoginPage enterUserName(String name) {
-        clearField(userNameInputField);
+        clearField(userNameInputField, "Clear username field");
         sendKeys(userNameInputField, name, "login is: " + name);
         return this;
     }
 
     public LoginPage enterPassword(String password) {
-        clearField(passwordInputField);
+        clearField(passwordInputField, "Clear password field");
         sendKeys(passwordInputField, password, "password is: " + password);
         return this;
     }

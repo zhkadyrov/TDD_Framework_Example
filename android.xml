@@ -15,7 +15,7 @@
         <!--        <parameter name="chromeDriverPort" value="11000"/>-->
         <classes>
             <class name="com.qa.tests.LoginTests"/>
-<!--            <class name="com.qa.tests.ProductsTest"/>-->
+            <class name="com.qa.tests.ProductsTest"/>
         </classes>
     </test>
 

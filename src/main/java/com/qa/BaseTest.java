@@ -1,7 +1,9 @@
 package com.qa;
 
+import com.aventstack.extentreports.ExtentTest;
 import com.aventstack.extentreports.Status;
 import com.google.common.collect.ImmutableMap;
+import com.qa.utils.ExtentReport;
 import com.qa.utils.TestUtils;
 import io.appium.java_client.AppiumBy;
 import io.appium.java_client.AppiumDriver;
@@ -37,7 +39,6 @@ import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.io.File.separator;
-
 public class BaseTest {
     // Thread-local переменные для параллельного выполнения
     private static final ThreadLocal<Integer> appiumPort = ThreadLocal.withInitial(() -> 4723);
@@ -395,6 +396,7 @@ public class BaseTest {
     @BeforeMethod
     public void beforeMethod() {
         ((CanRecordScreen) getDriver()).startRecordingScreen();
+        ExtentTest test = ExtentReport.startTest("MobileApp", "Setting up and initializin");
     }
 
     @AfterMethod
@@ -443,11 +445,7 @@ public class BaseTest {
     public void waitForVisibility(WebElement element) {
         getWait().until(ExpectedConditions.visibilityOf(element));
     }
-    public void click(WebElement element) {
-        waitForVisibility(element);
-        getWait().until(ExpectedConditions.elementToBeClickable(element));
-        element.click();
-    }
+
     public void click(WebElement element, String message) {
         waitForVisibility(element);
         getWait().until(ExpectedConditions.elementToBeClickable(element));
@@ -455,20 +453,19 @@ public class BaseTest {
         ExtentReport.getTest().log(Status.INFO, message);
         element.click();
     }
-    public void sendKeys(WebElement element, String text) {
-        waitForVisibility(element);
-        element.sendKeys(text);
-    }
+
     public void sendKeys(WebElement element, String text, String message) {
         waitForVisibility(element);
         testUtils.log().info(message);
         ExtentReport.getTest().log(Status.INFO, message);
         element.sendKeys(text);
     }
+
     public String getAttribute(WebElement element, String key) {
         waitForVisibility(element);
         return element.getAttribute(key);
     }
+
     public WebElement scrollToElement(String message) {
         if (getPlatform().equalsIgnoreCase("android")) {
             return getDriver().findElement(AppiumBy.androidUIAutomator(
@@ -485,9 +482,11 @@ public class BaseTest {
             ));
             return getDriver().findElement(AppiumBy.accessibilityId("test-Price"));
         }
+        testUtils.log().info(message);
         ExtentReport.getTest().log(Status.INFO, message);
         return null;
     }
+
     public String getText(WebElement element, String message) {
         String text = null;
 
@@ -496,10 +495,14 @@ public class BaseTest {
             case "ios": text = getAttribute(element, "label"); break;
         }
         ExtentReport.getTest().log(Status.INFO, message);
+        testUtils.log().info(message + text);
         return text;
     }
-    public void clearField(WebElement element) {
+
+    public void clearField(WebElement element, String message) {
         waitForVisibility(element);
+        testUtils.log().info(message);
+        ExtentReport.getTest().log(Status.INFO, message);
         element.clear();
     }
 }

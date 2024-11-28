@@ -15,7 +15,7 @@
         <!--        <parameter name="webKitDebugProxyPort" value="11001"/>-->
         <classes>
             <class name="com.qa.tests.LoginTests"/>
-<!--            <class name="com.qa.tests.ProductsTest"/>-->
+            <class name="com.qa.tests.ProductsTest"/>
         </classes>
     </test>
 

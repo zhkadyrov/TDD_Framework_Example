@@ -3,7 +3,7 @@ package com.qa.listeners;
 import com.aventstack.extentreports.MediaEntityBuilder;
 import com.aventstack.extentreports.Status;
 import com.qa.BaseTest;
-import com.qa.ExtentReport;
+import com.qa.utils.ExtentReport;
 import com.qa.utils.TestUtils;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
@@ -11,7 +11,6 @@ import org.openqa.selenium.OutputType;
 import org.testng.ITestContext;
 import org.testng.ITestListener;
 import org.testng.ITestResult;
-import org.testng.Reporter;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,10 +24,6 @@ import static java.io.File.separator;
 public class TestListener implements ITestListener {
     TestUtils testUtils = new TestUtils();
 
-    /**
-     * Метод, который срабатывает при падении теста.
-     * @param result объект `ITestResult`, содержащий информацию о тесте и его состоянии.
-     */
     public void onTestFailure(ITestResult result) {
         // Проверяем, что тест завершился с исключением (т.е. причина падения существует).
         if (result.getThrowable() != null) {
@@ -77,7 +72,6 @@ public class TestListener implements ITestListener {
             e.printStackTrace();
         }
 
-        //=======================================================================================
         ExtentReport.getTest().fail("Test Failed",
                 MediaEntityBuilder.createScreenCaptureFromPath(imagePath).build());
 
@@ -85,9 +79,6 @@ public class TestListener implements ITestListener {
                 MediaEntityBuilder.createScreenCaptureFromBase64String("base64String").build());
 
         ExtentReport.getTest().fail(result.getThrowable());
-        //=======================================================================================
-
-
     }
 
     @Override
