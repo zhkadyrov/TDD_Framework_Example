@@ -53,7 +53,7 @@ public class TestUtils {
     }
 
     public Logger log() {
-        ThreadContext.put("ROUTINGKEY", "default");
+//        ThreadContext.put("ROUTINGKEY", "default");
         return LogManager.getLogger(Thread.currentThread().getStackTrace()[2].getClassName());
     }
 
