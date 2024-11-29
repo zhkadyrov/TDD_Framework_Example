@@ -184,12 +184,22 @@ public class BaseTest {
     }
 
     private AppiumDriverLocalService getAppiumService(int port) { // Для Mac лучше использовать это
+        HashMap<String, String> environment = new HashMap<>();
+        environment.put("PATH", "/Users/janbolot/Library/Android/sdk/platform-tools:" +
+                "/Users/janbolot/Library/Android/sdk/emulator:" +
+                "/Users/janbolot/Library/Android/sdk/cmdline-tools/latest/bin:" +
+                "/opt/homebrew/opt/node@18/bin:" +
+                "/Users/janbolot/.nvm/versions/node/v22.9.0/bin:" +
+                "/usr/bin:/bin:/usr/sbin:/sbin");
+        environment.put("ANDROID_HOME", "/Users/janbolot/Library/Android/sdk");
+
         ensurePortIsFree(port); // Проверяем и освобождаем порт перед запуском сервера
         return AppiumDriverLocalService.buildService(new AppiumServiceBuilder()
                 .usingDriverExecutable(new File("/opt/homebrew/opt/node@18/bin/node"))
                 .withAppiumJS(new File("/opt/homebrew/lib/node_modules/appium/build/lib/main.js"))
                 .usingPort(port) // Уникальный или дефолтный порт
                 .withArgument(GeneralServerFlag.SESSION_OVERRIDE)
+                .withEnvironment(environment)
                 .withLogFile(new File("ServerLogs/server-" + port + ".log")));
     }
 
