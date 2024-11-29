@@ -51,9 +51,9 @@
                     <version>3.5.1</version>
                     <configuration>
                         <suiteXmlFiles>
-                        <!-- <suiteXmlFile>${suiteXmlFile}</suiteXmlFile>-->
-                            <suiteXmlFile>android.xml</suiteXmlFile>
-                            <suiteXmlFile>ios.xml</suiteXmlFile>
+                         <suiteXmlFile>${suiteXmlFile}</suiteXmlFile>
+<!--                            <suiteXmlFile>android.xml</suiteXmlFile>-->
+<!--                            <suiteXmlFile>ios.xml</suiteXmlFile>-->
                         </suiteXmlFiles>
                     </configuration>
                 </plugin>
