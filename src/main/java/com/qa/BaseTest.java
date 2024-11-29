@@ -25,6 +25,8 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.RemoteWebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.ISuite;
+import org.testng.ITestContext;
 import org.testng.ITestResult;
 import org.testng.annotations.*;
 
@@ -108,7 +110,7 @@ public class BaseTest {
 
     @BeforeSuite
     @Parameters({"parallel"})
-    public void beforeSuite(@Optional("false") String parallel) {
+    public void beforeSuite(@Optional("false") String parallel, ITestContext context) {
         int port = parallel.equalsIgnoreCase("true") ? portCounter.getAndIncrement() : 4723; // Выбор порта
         appiumPort.set(port);
 
@@ -119,6 +121,8 @@ public class BaseTest {
         server.start();
         server.clearOutPutStreams();
         testUtils.log().info("Appium server started on port: " + port);
+
+        ExtentTest test = ExtentReport.startTest(context.getSuite().getName(), "");
     }
 
 
@@ -396,7 +400,6 @@ public class BaseTest {
     @BeforeMethod
     public void beforeMethod() {
         ((CanRecordScreen) getDriver()).startRecordingScreen();
-        ExtentTest test = ExtentReport.startTest("MobileApp", "Setting up and initializin");
     }
 
     @AfterMethod

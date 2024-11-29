@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
-<suite name="All Test Suite" parallel="none"> <!-- none or tests -->
+<suite name="Android Devices" parallel="none"> <!-- none or tests -->
     <listeners>
         <listener class-name="com.qa.listeners.TestListener"/>
     </listeners>
 
-    <test name="Android Tests">
+    <test name="Pixel 5">
         <parameter name="realDevice" value="false"/>
         <parameter name="parallel" value="false"/>
         <parameter name="platformName" value="Android"/>

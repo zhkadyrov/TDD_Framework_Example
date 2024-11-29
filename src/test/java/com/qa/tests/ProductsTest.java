@@ -1,10 +1,12 @@
 package com.qa.tests;
 
+import com.aventstack.extentreports.ExtentTest;
 import com.qa.BaseTest;
 import com.qa.pages.LoginPage;
 import com.qa.pages.ProductDetailsPage;
 import com.qa.pages.ProductsPage;
 import com.qa.pages.SettingsPage;
+import com.qa.utils.ExtentReport;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.testng.Assert;
@@ -35,6 +37,7 @@ public class ProductsTest extends BaseTest {
         productDetailsPage = new ProductDetailsPage();
         loginUsers = loadJsonData("data/loginUsers.json"); // Загрузка данных для входа.
         launchApp();
+//        ExtentTest test = ExtentReport.startTest("ProductsTest", "");
     }
 
     @AfterClass
