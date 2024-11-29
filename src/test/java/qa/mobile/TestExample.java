@@ -24,7 +24,7 @@ public class TestExample {
         URL url = new URL("http://0.0.0.0:4723/");
 
         String androidApp = System.getProperty("user.dir") + separator + "src" + separator + "test" + separator
-                + "resources" + separator + "app/SauceLabsMobileSampleApp271.apk";
+                + "resources" + separator + "app/SauceLabsMobileSampleApp.apk";
 
         UiAutomator2Options androidOptions = new UiAutomator2Options();
         androidOptions.setCapability("appium:automationName", "UiAutomator2");
