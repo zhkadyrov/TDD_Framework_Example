@@ -365,19 +365,15 @@ public class BaseTest {
 
     // Device management
     public static void stopIOSSimulator() {
-        try {
+        try{
             String command = "xcrun simctl shutdown all";
             Process process = new ProcessBuilder("/bin/bash", "-c", command).start();
-            int exitCode = process.waitFor();
-            if (exitCode == 0) {
-                log.info("All iOS Simulators have been stopped.");
-            } else {
-                log.error("Failed to stop iOS Simulators. Exit code: " + exitCode);
-            }
+            log.info("All iOS Simulators have been stopped.");
         } catch (Exception e) {
             log.error("Error while stopping iOS Simulators: ", e);
         }
     }
+
     public static void stopAndroidEmulator() {
         try{
             String command = "adb emu kill";
@@ -386,20 +382,6 @@ public class BaseTest {
         } catch (Exception e) {
             log.error("Error while stopping Android Emulators: ", e);
         }
-
-//        try {
-//            String command = "adb emu kill";
-//            Process process = new ProcessBuilder("/bin/bash", "-c", command).start();
-//            log.info("All Android Emulators have been stopped.");
-//            int exitCode = process.waitFor();
-//            if (exitCode == 0) {
-//                log.info("All Android Emulators have been stopped.");
-//            } else {
-//                log.error("Failed to stop Android Emulators. Exit code: " + exitCode);
-//            }
-//        } catch (Exception e) {
-//            log.error("Error while stopping Android Emulators: ", e);
-//        }
     }
     public void closeApp() {
         switch (getPlatform().toLowerCase()) {
