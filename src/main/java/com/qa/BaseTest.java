@@ -190,6 +190,7 @@ public class BaseTest {
                 "/Users/janbolot/Library/Android/sdk/cmdline-tools/latest/bin:" +
                 "/opt/homebrew/opt/node@18/bin:" +
                 "/Users/janbolot/.nvm/versions/node/v22.9.0/bin:" +
+                "/opt/homebrew/bin:" + // Добавляем путь к ffmpeg для MacOs
                 "/usr/bin:/bin:/usr/sbin:/sbin");
         environment.put("ANDROID_HOME", "/Users/janbolot/Library/Android/sdk");
 
