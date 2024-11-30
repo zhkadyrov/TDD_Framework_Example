@@ -41,7 +41,7 @@ import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.io.File.separator;
-public class BaseTest {
+public class BaseTest { // Да в общем-то никаких изменений, это ради проверки вебхука
     // Thread-local переменные для параллельного выполнения
     private static final ThreadLocal<Integer> appiumPort = ThreadLocal.withInitial(() -> 4723);
     private static final AtomicInteger portCounter = new AtomicInteger(4723);
