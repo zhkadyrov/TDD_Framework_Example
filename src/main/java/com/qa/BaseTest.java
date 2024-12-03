@@ -329,8 +329,8 @@ public class BaseTest { // Да в общем-то никаких изменен
             options.setCapability("appium:automationName", getProperty().getProperty("iosAutomationName"));
         }
 
-        options.setCapability("appWaitDuration", 60000); // увеличьте до 60 секунд
-        options.setCapability("adbExecTimeout", 60000); // увеличьте таймаут выполнения ADB
+        options.setCapability("appWaitDuration", 60000);
+        options.setCapability("adbExecTimeout", 60000);
         options.setCapability("appium:automationName", getProperty().getProperty(platformName.toLowerCase() + "AutomationName"));
         options.setCapability("appium:platformName", platformName);
         options.setCapability("appium:platformVersion", platformVersion);
