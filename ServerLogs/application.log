@@ -1,0 +1,7 @@
+[ServerLogs INFO ] 2024-11-30 11:34:18.294 BaseTest:502 - text is: carry.allTheThings() with the sleek, streamlined Sly Pack that melds uncompromising style with unequaled laptop and tablet protection.
+[ServerLogs INFO ] 2024-11-30 11:34:22.148 BaseTest:502 - price is: $29.99
+[ServerLogs INFO ] 2024-11-30 11:34:22.402 BaseTest:456 - press back to product button
+[ServerLogs INFO ] 2024-11-30 11:34:23.400 BaseTest:456 - press Settings button
+[ServerLogs INFO ] 2024-11-30 11:34:25.226 BaseTest:456 - press logout button
+[ServerLogs INFO ] 2024-11-30 11:34:28.744 BaseTest:381 - All Android Emulators have been stopped.
+[ServerLogs INFO ] 2024-11-30 11:34:34.051 BaseTest:133 - Appium server stopped on port: 4723

@@ -1,0 +1,12 @@
+[ServerLogs INFO ] 2024-11-30 11:33:51.260 BaseTest:463 - password is: invalid_password
+[ServerLogs INFO ] 2024-11-30 11:33:52.456 BaseTest:456 - Press login button
+[ServerLogs INFO ] 2024-11-30 11:33:53.557 BaseTest:502 - error text is: Username and password do not match any user in this service.
+[ServerLogs INFO ] 2024-11-30 11:33:54.914 BaseTest:508 - Clear username field
+[ServerLogs INFO ] 2024-11-30 11:33:55.499 BaseTest:463 - login is: standard_user
+[ServerLogs INFO ] 2024-11-30 11:33:56.114 BaseTest:508 - Clear password field
+[ServerLogs INFO ] 2024-11-30 11:33:56.703 BaseTest:463 - password is: secret_sauce
+[ServerLogs INFO ] 2024-11-30 11:33:57.871 BaseTest:456 - Press login button
+[ServerLogs INFO ] 2024-11-30 11:33:59.302 BaseTest:502 - product page title is: PRODUCTS
+[ServerLogs INFO ] 2024-11-30 11:34:02.859 BaseTest:508 - Clear username field
+[ServerLogs INFO ] 2024-11-30 11:34:03.413 BaseTest:463 - login is: standard_user
+[ServerLogs INFO ] 2024-11-30 11:34:05.002 BaseTest:508 - Clear password field

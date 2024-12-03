@@ -1,0 +1,13 @@
+[ServerLogs INFO ] 2024-11-30 11:34:06.094 BaseTest:463 - password is: secret_sauce
+[ServerLogs INFO ] 2024-11-30 11:34:06.768 BaseTest:456 - Press login button
+[ServerLogs INFO ] 2024-11-30 11:34:08.185 BaseTest:502 - title is: Sauce Labs Backpack
+[ServerLogs INFO ] 2024-11-30 11:34:08.510 BaseTest:502 - price is: $29.99
+[ServerLogs INFO ] 2024-11-30 11:34:08.860 BaseTest:456 - press Settings button
+[ServerLogs INFO ] 2024-11-30 11:34:10.699 BaseTest:456 - press logout button
+[ServerLogs INFO ] 2024-11-30 11:34:12.405 BaseTest:508 - Clear username field
+[ServerLogs INFO ] 2024-11-30 11:34:12.938 BaseTest:463 - login is: standard_user
+[ServerLogs INFO ] 2024-11-30 11:34:14.031 BaseTest:508 - Clear password field
+[ServerLogs INFO ] 2024-11-30 11:34:14.580 BaseTest:463 - password is: secret_sauce
+[ServerLogs INFO ] 2024-11-30 11:34:15.248 BaseTest:456 - Press login button
+[ServerLogs INFO ] 2024-11-30 11:34:16.741 BaseTest:456 - press SLB title
+[ServerLogs INFO ] 2024-11-30 11:34:18.072 BaseTest:502 - title is: Sauce Labs Backpack

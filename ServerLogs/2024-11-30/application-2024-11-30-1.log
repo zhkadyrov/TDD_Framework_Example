@@ -1,0 +1,12 @@
+[ServerLogs INFO ] 2024-11-30 11:33:15.979 BaseTest:123 - Appium server started on port: 4723
+[ServerLogs INFO ] 2024-11-30 11:33:16.118 BaseTest:344 - Loaded properties from: config.properties
+[ServerLogs INFO ] 2024-11-30 11:33:16.127 BaseTest:360 - Loaded strings from: strings/strings.xml
+[ServerLogs INFO ] 2024-11-30 11:33:43.026 BaseTest:508 - Clear username field
+[ServerLogs INFO ] 2024-11-30 11:33:43.602 BaseTest:463 - login is: invalid_username
+[ServerLogs INFO ] 2024-11-30 11:33:44.218 BaseTest:508 - Clear password field
+[ServerLogs INFO ] 2024-11-30 11:33:44.804 BaseTest:463 - password is: secret_sauce
+[ServerLogs INFO ] 2024-11-30 11:33:45.962 BaseTest:456 - Press login button
+[ServerLogs INFO ] 2024-11-30 11:33:47.650 BaseTest:502 - error text is: Username and password do not match any user in this service.
+[ServerLogs INFO ] 2024-11-30 11:33:48.940 BaseTest:508 - Clear username field
+[ServerLogs INFO ] 2024-11-30 11:33:49.542 BaseTest:463 - login is: standard_user
+[ServerLogs INFO ] 2024-11-30 11:33:50.670 BaseTest:508 - Clear password field

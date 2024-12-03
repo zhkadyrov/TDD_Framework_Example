@@ -41,7 +41,7 @@ import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.io.File.separator;
-public class BaseTest {
+public class BaseTest { // Да в общем-то никаких изменений, это ради проверки вебхука
     // Thread-local переменные для параллельного выполнения
     private static final ThreadLocal<Integer> appiumPort = ThreadLocal.withInitial(() -> 4723);
     private static final AtomicInteger portCounter = new AtomicInteger(4723);
@@ -190,6 +190,7 @@ public class BaseTest {
                 "/Users/janbolot/Library/Android/sdk/cmdline-tools/latest/bin:" +
                 "/opt/homebrew/opt/node@18/bin:" +
                 "/Users/janbolot/.nvm/versions/node/v22.9.0/bin:" +
+                "/opt/homebrew/bin:" + // Добавляем путь к ffmpeg для MacOs
                 "/usr/bin:/bin:/usr/sbin:/sbin");
         environment.put("ANDROID_HOME", "/Users/janbolot/Library/Android/sdk");
 
@@ -297,6 +298,7 @@ public class BaseTest {
         options.setCapability("appium:avd", deviceName);
         options.setCapability("appium:avdLaunchTimeout", 120_000);
         options.setCapability("appium:newCommandTimeout", 120);
+
         options.setCapability("appium:appPackage", getProperty().getProperty("androidAppPackage"));
         options.setCapability("appium:appActivity", getProperty().getProperty("androidAppActivity"));
 
@@ -327,6 +329,8 @@ public class BaseTest {
             options.setCapability("appium:automationName", getProperty().getProperty("iosAutomationName"));
         }
 
+        options.setCapability("appWaitDuration", 60000); // увеличьте до 60 секунд
+        options.setCapability("adbExecTimeout", 60000); // увеличьте таймаут выполнения ADB
         options.setCapability("appium:automationName", getProperty().getProperty(platformName.toLowerCase() + "AutomationName"));
         options.setCapability("appium:platformName", platformName);
         options.setCapability("appium:platformVersion", platformVersion);
